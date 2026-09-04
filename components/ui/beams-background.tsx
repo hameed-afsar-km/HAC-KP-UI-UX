@@ -28,12 +28,12 @@ function createBeam(width: number, height: number): Beam {
   return {
     x: Math.random() * width * 1.5 - width * 0.25,
     y: Math.random() * height * 1.5 - height * 0.25,
-    width: 40 + Math.random() * 80,
+    width: 50 + Math.random() * 80,
     length: height * 2.5,
     angle,
     speed: 0.6 + Math.random() * 1.2,
-    opacity: 0.25 + Math.random() * 0.2,
-    hue: 20 + Math.random() * 15,
+    opacity: 0.12 + Math.random() * 0.1,
+    hue: 16 + Math.random() * 8,
     pulse: Math.random() * Math.PI * 2,
     pulseSpeed: 0.02 + Math.random() * 0.03,
   };
@@ -80,10 +80,10 @@ export function BeamsBackground({
         const spacing = logicalW / 3;
         beam.y = logicalH + 100;
         beam.x = column * spacing + spacing / 2 + (Math.random() - 0.5) * spacing * 0.5;
-        beam.width = 100 + Math.random() * 120;
+        beam.width = 140 + Math.random() * 160;
         beam.speed = 0.5 + Math.random() * 0.4;
-        beam.hue = 20 + (index * 15) / totalBeams;
-        beam.opacity = 0.25 + Math.random() * 0.2;
+        beam.hue = 16 + (index * 8) / totalBeams;
+        beam.opacity = 0.12 + Math.random() * 0.1;
       }
 
       ctx.save();
@@ -94,14 +94,14 @@ export function BeamsBackground({
         beam.opacity * (0.85 + Math.sin(beam.pulse) * 0.15) * opacityMap[intensity];
 
       const gradient = ctx.createLinearGradient(0, 0, 0, beam.length);
-      gradient.addColorStop(0, `hsla(${beam.hue}, 85%, 55%, 0)`);
-      gradient.addColorStop(0.05, `hsla(${beam.hue}, 85%, 55%, ${pulsingOpacity * 0.3})`);
-      gradient.addColorStop(0.15, `hsla(${beam.hue}, 85%, 55%, ${pulsingOpacity * 0.7})`);
-      gradient.addColorStop(0.35, `hsla(${beam.hue}, 85%, 55%, ${pulsingOpacity})`);
-      gradient.addColorStop(0.65, `hsla(${beam.hue}, 85%, 55%, ${pulsingOpacity})`);
-      gradient.addColorStop(0.85, `hsla(${beam.hue}, 85%, 55%, ${pulsingOpacity * 0.7})`);
-      gradient.addColorStop(0.95, `hsla(${beam.hue}, 85%, 55%, ${pulsingOpacity * 0.3})`);
-      gradient.addColorStop(1, `hsla(${beam.hue}, 85%, 55%, 0)`);
+      gradient.addColorStop(0, `hsla(${beam.hue}, 90%, 40%, 0)`);
+      gradient.addColorStop(0.05, `hsla(${beam.hue}, 90%, 40%, ${pulsingOpacity * 0.3})`);
+      gradient.addColorStop(0.15, `hsla(${beam.hue}, 90%, 40%, ${pulsingOpacity * 0.7})`);
+      gradient.addColorStop(0.35, `hsla(${beam.hue}, 90%, 40%, ${pulsingOpacity})`);
+      gradient.addColorStop(0.65, `hsla(${beam.hue}, 90%, 40%, ${pulsingOpacity})`);
+      gradient.addColorStop(0.85, `hsla(${beam.hue}, 90%, 40%, ${pulsingOpacity * 0.7})`);
+      gradient.addColorStop(0.95, `hsla(${beam.hue}, 90%, 40%, ${pulsingOpacity * 0.3})`);
+      gradient.addColorStop(1, `hsla(${beam.hue}, 90%, 40%, 0)`);
 
       ctx.fillStyle = gradient;
       ctx.fillRect(-beam.width / 2, 0, beam.width, beam.length);
@@ -178,7 +178,7 @@ export function BeamsBackground({
           repeat: Number.POSITIVE_INFINITY,
         }}
         style={{
-          background: "radial-gradient(ellipse at 50% 30%, rgba(232, 80, 2, 0.06) 0%, transparent 70%)",
+          background: "radial-gradient(ellipse at 50% 30%, rgba(180, 50, 0, 0.04) 0%, transparent 70%)",
         }}
       />
 
