@@ -1,0 +1,270 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ─── Design Tokens ──────────────────────────────────────────────────────── */
+@layer base {
+  :root {
+    /* Brand */
+    --brand:         #E85002;
+    --brand-hover:   #F16001;
+    --brand-dim:     #C10801;
+
+    /* Light mode surfaces - keeping it light but aligning with gray/white theme */
+    --bg:            #F9F9F9;
+    --surface:       #FFFFFF;
+    --surface-2:     #F0F0F0;
+    --border:        #A7A7A7;
+    --border-2:      #646464;
+
+    /* Light mode text */
+    --text-1:        #000000;
+    --text-2:        #333333;
+    --text-3:        #646464;
+    --text-4:        #A7A7A7;
+  }
+
+  .dark {
+    /* Brand */
+    --brand:         #E85002;
+    --brand-hover:   #F16001;
+    --brand-dim:     #C10801;
+
+    /* Dark mode surfaces — pure black / dark gray */
+    --bg:            #000000;
+    --surface:       #111111;
+    --surface-2:     #222222;
+    --border:        #333333;
+    --border-2:      #646464;
+
+    /* Dark mode text */
+    --text-1:        #F9F9F9;
+    --text-2:        #A7A7A7;
+    --text-3:        #888888;
+    --text-4:        #646464;
+  }
+
+  body {
+    background-color: var(--bg);
+    color: var(--text-1);
+    font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    min-height: 100vh;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* ─── Animation Keyframes ─────────────────────────────────────────────────── */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.5; transform: scale(0.85); }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position:  200% center; }
+}
+
+/* ─── Animation Utilities ─────────────────────────────────────────────────── */
+.animate-fade-up {
+  animation: fadeUp 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease both;
+}
+
+.animate-slide-in-right {
+  animation: slideInRight 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-slide-in-up {
+  animation: slideInUp 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Staggered card delays */
+.stagger-1  { animation-delay: 0ms;   }
+.stagger-2  { animation-delay: 60ms;  }
+.stagger-3  { animation-delay: 120ms; }
+.stagger-4  { animation-delay: 180ms; }
+.stagger-5  { animation-delay: 240ms; }
+.stagger-6  { animation-delay: 300ms; }
+
+/* ─── Card Hover Lift ─────────────────────────────────────────────────────── */
+.card-hover {
+  transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1),
+              box-shadow 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.12),
+              0 2px 8px -2px rgba(0, 0, 0, 0.08);
+}
+.dark .card-hover:hover {
+  box-shadow: 0 8px 32px -4px rgba(0, 0, 0, 0.5),
+              0 2px 12px -2px rgba(0, 0, 0, 0.3);
+}
+
+/* ─── Surface Token Classes ──────────────────────────────────────────────── */
+.bg-surface   { background-color: var(--surface); }
+.bg-surface-2 { background-color: var(--surface-2); }
+.border-token { border-color: var(--border); }
+.text-1       { color: var(--text-1); }
+.text-2       { color: var(--text-2); }
+.text-3       { color: var(--text-3); }
+.text-4       { color: var(--text-4); }
+
+/* ─── Island Nav ─────────────────────────────────────────────────────────── */
+.island-nav {
+  transition: padding 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+              background-color 0.25s ease,
+              box-shadow 0.25s ease,
+              border-color 0.25s ease;
+}
+
+/* Sliding tab underline indicator */
+.tab-indicator {
+  position: relative;
+}
+.tab-indicator::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--brand);
+  border-radius: 2px 2px 0 0;
+  transform: scaleX(1);
+  transition: transform 0.2s ease;
+}
+
+/* ─── Status Badges ───────────────────────────────────────────────────────── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 9px;
+  border-radius: 6px;
+  border-width: 1px;
+  line-height: 1.6;
+}
+
+.badge-orange {
+  background: rgba(232, 80, 2, 0.12);
+  color: #E85002;
+  border-color: rgba(232, 80, 2, 0.25);
+}
+.badge-green {
+  background: rgba(16, 185, 129, 0.1);
+  color: #059669;
+  border-color: rgba(16, 185, 129, 0.25);
+}
+.dark .badge-green { color: #34d399; }
+
+.badge-amber {
+  background: rgba(245, 158, 11, 0.1);
+  color: #b45309;
+  border-color: rgba(245, 158, 11, 0.25);
+}
+.dark .badge-amber { color: #fbbf24; }
+
+.badge-blue {
+  background: rgba(59, 130, 246, 0.1);
+  color: #2563eb;
+  border-color: rgba(59, 130, 246, 0.25);
+}
+.dark .badge-blue { color: #60a5fa; }
+
+.badge-red {
+  background: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
+  border-color: rgba(239, 68, 68, 0.25);
+}
+.dark .badge-red { color: #f87171; }
+
+.badge-muted {
+  background: var(--surface-2);
+  color: var(--text-3);
+  border-color: var(--border);
+}
+
+/* ─── Subtle ambient glow ─────────────────────────────────────────────────── */
+.brand-glow {
+  box-shadow: 0 0 0 1px rgba(232, 80, 2, 0.2),
+              0 4px 16px rgba(232, 80, 2, 0.12);
+}
+
+/* ─── Scrollbars ─────────────────────────────────────────────────────────── */
+::-webkit-scrollbar        { width: 5px; height: 5px; }
+::-webkit-scrollbar-track  { background: transparent; }
+::-webkit-scrollbar-thumb  {
+  background: var(--border-2);
+  border-radius: 99px;
+}
+::-webkit-scrollbar-thumb:hover { background: var(--brand); }
+
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* ─── Misc ───────────────────────────────────────────────────────────────── */
+.tabular-nums { font-variant-numeric: tabular-nums; }
+
+.gradient-text {
+  background: linear-gradient(135deg, var(--text-1), var(--brand));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Skeleton shimmer */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--surface-2) 25%,
+    var(--border) 50%,
+    var(--surface-2) 75%
+  );
+  background-size: 200% auto;
+  animation: shimmer 1.5s linear infinite;
+}
