@@ -30,6 +30,42 @@ interface SimulatedNode extends GraphNode {
   dragTargetY?: number;
 }
 
+const NODE_ICONS: Record<string, string> = {
+  PERSON: '\u{1F464}',
+  ORGANIZATION: '\u{1F3E2}',
+  DEVICE: '\u{1F4F1}',
+  DEVICE_IDENTIFIER: '\u{1F4F1}',
+  IP_ADDRESS: '\u{1F310}',
+  TRANSACTION: '\u{1F4B0}',
+  WALLET_ADDRESS: '\u{1F4B3}',
+  EMAIL: '\u{2709}',
+  MAIL: '\u{2709}',
+  ACCOUNT: '\u{1F4B3}',
+  LOCATION: '\u{1F4CD}',
+  PHONE_NUMBER: '\u{260E}',
+  USERNAME: '\u{1F464}',
+  DOCUMENT: '\u{1F4C4}',
+  IDENTITY: '\u{2B50}',
+};
+
+const NODE_ABBR: Record<string, string> = {
+  PERSON: 'P',
+  ORGANIZATION: 'O',
+  DEVICE: 'D',
+  DEVICE_IDENTIFIER: 'D',
+  IP_ADDRESS: 'IP',
+  TRANSACTION: 'T',
+  WALLET_ADDRESS: 'W',
+  EMAIL: '@',
+  MAIL: '@',
+  ACCOUNT: 'A',
+  LOCATION: 'L',
+  PHONE_NUMBER: '\u{260E}',
+  USERNAME: '@',
+  DOCUMENT: 'DOC',
+  IDENTITY: '\u{2605}',
+};
+
 export default function InvestigationCanvas({
   data,
   onSelectNode,
@@ -46,7 +82,7 @@ export default function InvestigationCanvas({
   const [edges, setEdges] = useState<GraphEdge[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTypeFilter, setSelectedTypeFilter] = useState<string>('ALL');
-  const [isPhysicsRunning, setIsPhysicsRunning] = useState(true);
+  const [isPhysicsRunning, setIsPhysicsRunning] = useState(false);
 
   const transformRef = useRef({ x: 0, y: 0, k: 1 });
   const isDraggingCanvasRef = useRef(false);
@@ -67,7 +103,7 @@ export default function InvestigationCanvas({
 
       const newSimNodes: SimulatedNode[] = data.nodes.map((n) => {
         const existing = existingMap.get(n.id);
-        const radius = n.isIdentity ? 24 : Math.max(13, n.val * 0.78);
+        const radius = n.isIdentity ? 26 : Math.max(16, n.val * 0.78);
         
         if (existing) {
           return { ...existing, ...n, radius };
@@ -104,16 +140,14 @@ export default function InvestigationCanvas({
       const height = canvas.height;
       ctx.clearRect(0, 0, width, height);
 
-      // Background
       ctx.fillStyle = '#000000';
       ctx.fillRect(0, 0, width, height);
 
-      // Texture Grid Dots
       ctx.save();
-      ctx.fillStyle = '#333333';
+      ctx.fillStyle = '#222222';
       for (let x = 0; x < width; x += 24) {
         for (let y = 0; y < height; y += 24) {
-          ctx.fillRect(x, y, 1.5, 1.5);
+          ctx.fillRect(x, y, 1.2, 1.2);
         }
       }
       ctx.restore();
@@ -122,6 +156,17 @@ export default function InvestigationCanvas({
       const { x, y, k } = transformRef.current;
       ctx.translate(x, y);
       ctx.scale(k, k);
+
+      // Apply dragged node position regardless of physics
+      if (draggedNodeRef.current) {
+        const dn = draggedNodeRef.current;
+        if (dn.dragTargetX !== undefined && dn.dragTargetY !== undefined) {
+          dn.x = dn.dragTargetX;
+          dn.y = dn.dragTargetY;
+          dn.vx = 0;
+          dn.vy = 0;
+        }
+      }
 
       // Physics Simulation Step
       if (isPhysicsRunning) {
@@ -161,24 +206,17 @@ export default function InvestigationCanvas({
         });
 
         nodes.forEach((n) => {
-          if (n.id === draggedNodeRef.current?.id) {
-            n.x = n.dragTargetX || n.x;
-            n.y = n.dragTargetY || n.y;
-            n.vx = 0;
-            n.vy = 0;
-          } else {
-            // Gravity to center
-            const gx = width / 2 - n.x;
-            const gy = height / 2 - n.y;
-            n.vx += gx * 0.0003;
-            n.vy += gy * 0.0003;
+          if (n.id === draggedNodeRef.current?.id) return;
 
-            // Friction
-            n.vx *= 0.85;
-            n.vy *= 0.85;
-            n.x += n.vx;
-            n.y += n.vy;
-          }
+          const gx = width / 2 - n.x;
+          const gy = height / 2 - n.y;
+          n.vx += gx * 0.0003;
+          n.vy += gy * 0.0003;
+
+          n.vx *= 0.85;
+          n.vy *= 0.85;
+          n.x += n.vx;
+          n.y += n.vy;
         });
       }
 
@@ -226,7 +264,6 @@ export default function InvestigationCanvas({
 
         ctx.stroke();
 
-        // Arrow
         const angle = Math.atan2(tNode.y - sNode.y, tNode.x - sNode.x);
         const arrowDist = tNode.radius + 12;
         const arrowX = tNode.x - Math.cos(angle) * arrowDist;
@@ -246,7 +283,6 @@ export default function InvestigationCanvas({
         ctx.closePath();
         ctx.fill();
 
-        // Edge text badge
         const midX = (sNode.x + tNode.x) / 2;
         const midY = (sNode.y + tNode.y) / 2;
 
@@ -255,14 +291,12 @@ export default function InvestigationCanvas({
           const text = edge.label || edge.relationshipName;
           const textWidth = ctx.measureText(text).width;
 
-          // Box
           ctx.fillStyle = '#111111';
           ctx.fillRect(midX - textWidth / 2 - 4, midY - 7, textWidth + 8, 14);
           ctx.strokeStyle = '#333333';
           ctx.lineWidth = 1;
           ctx.strokeRect(midX - textWidth / 2 - 4, midY - 7, textWidth + 8, 14);
 
-          // Text
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
           ctx.fillStyle = edge.relationshipName === 'RESOLVED_TO'
@@ -280,6 +314,7 @@ export default function InvestigationCanvas({
       nodes.forEach((node) => {
         const isSelected = selectedNodeId === node.id;
         const isHovered = hoveredNodeRef.current?.id === node.id;
+        const isDragged = draggedNodeRef.current?.id === node.id;
         const matchesSearch =
           searchQuery.trim() !== '' &&
           node.label.toLowerCase().includes(searchQuery.toLowerCase());
@@ -312,6 +347,7 @@ export default function InvestigationCanvas({
         else if (node.type === 'USERNAME') nodeColor = '#EAB308';
         else if (node.type === 'DOCUMENT') nodeColor = '#94A3B8';
 
+        // Selection / identity ring
         if (node.isIdentity || matchesSearch || isSelected) {
           ctx.beginPath();
           ctx.arc(node.x, node.y, node.radius + 8, 0, 2 * Math.PI);
@@ -320,6 +356,16 @@ export default function InvestigationCanvas({
           ctx.stroke();
         }
 
+        // Glow for hovered/dragged
+        if (isHovered || isDragged) {
+          ctx.beginPath();
+          ctx.arc(node.x, node.y, node.radius + 4, 0, 2 * Math.PI);
+          ctx.strokeStyle = `${nodeColor}66`;
+          ctx.lineWidth = 6;
+          ctx.stroke();
+        }
+
+        // Node circle
         ctx.beginPath();
         ctx.arc(node.x, node.y, node.radius, 0, 2 * Math.PI);
         ctx.fillStyle = isDimmed ? 'rgba(51, 51, 51, 0.4)' : nodeColor;
@@ -327,26 +373,49 @@ export default function InvestigationCanvas({
 
         ctx.strokeStyle = isSelected
           ? '#E85002'
-          : isHovered
+          : isHovered || isDragged
             ? '#F9F9F9'
             : '#333333';
-        ctx.lineWidth = isSelected ? 3 : isHovered ? 2 : 1.5;
+        ctx.lineWidth = isSelected ? 3 : isHovered || isDragged ? 2 : 1.5;
         ctx.stroke();
 
+        // Draw type icon/abbreviation inside node
+        const abbr = NODE_ABBR[node.type] || node.type.charAt(0);
+        if (node.radius >= 20) {
+          ctx.font = `bold ${Math.max(10, node.radius * 0.55)}px system-ui, -apple-system, sans-serif`;
+        } else {
+          ctx.font = `bold ${Math.max(8, node.radius * 0.6)}px system-ui, -apple-system, sans-serif`;
+        }
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+
+        // Dark text on light nodes, light text on dark nodes
+        const isLightNode = ['PERSON', 'ACCOUNT', 'DOCUMENT', 'PHONE_NUMBER', 'USERNAME'].includes(node.type);
+        ctx.fillStyle = isDimmed
+          ? 'rgba(0,0,0,0.3)'
+          : isLightNode
+            ? '#111111'
+            : '#000000';
+        ctx.fillText(abbr, node.x, node.y + 1);
+
+        // Label below node
         ctx.font = 'bold 11px system-ui, -apple-system, sans-serif';
         ctx.textAlign = 'center';
+        ctx.textBaseline = 'top';
 
         const labelText = node.label;
         const labelWidth = ctx.measureText(labelText).width;
 
         ctx.fillStyle = '#111111';
-        ctx.fillRect(node.x - labelWidth / 2 - 5, node.y + node.radius + 4, labelWidth + 10, 16);
+        const labelY = node.y + node.radius + 5;
+        ctx.fillRect(node.x - labelWidth / 2 - 5, labelY, labelWidth + 10, 16);
         ctx.strokeStyle = '#333333';
         ctx.lineWidth = 1;
-        ctx.strokeRect(node.x - labelWidth / 2 - 5, node.y + node.radius + 4, labelWidth + 10, 16);
+        ctx.strokeRect(node.x - labelWidth / 2 - 5, labelY, labelWidth + 10, 16);
 
         ctx.fillStyle = isDimmed ? '#646464' : '#F9F9F9';
-        ctx.fillText(labelText, node.x, node.y + node.radius + 16);
+        ctx.textBaseline = 'middle';
+        ctx.fillText(labelText, node.x, labelY + 8);
 
         ctx.restore();
       });
@@ -365,14 +434,12 @@ export default function InvestigationCanvas({
     if (!canvas) return { mouseX: 0, mouseY: 0, rawX: 0, rawY: 0 };
     const rect = canvas.getBoundingClientRect();
     
-    // Convert DOM CSS pixels to internal canvas buffer pixels
     const scaleX = canvas.width / rect.width;
     const scaleY = canvas.height / rect.height;
     
     const x = (e.clientX - rect.left) * scaleX;
     const y = (e.clientY - rect.top) * scaleY;
     
-    // Apply transform inverse for internal coordinates
     const mouseX = (x - transformRef.current.x) / transformRef.current.k;
     const mouseY = (y - transformRef.current.y) / transformRef.current.k;
     
@@ -432,6 +499,9 @@ export default function InvestigationCanvas({
       draggedNodeRef.current.dragTargetY = mouseY;
       draggedNodeRef.current.vx = 0;
       draggedNodeRef.current.vy = 0;
+
+      // Force re-render so canvas updates node position
+      setNodes((prev) => [...prev]);
       return;
     }
 
@@ -558,7 +628,7 @@ export default function InvestigationCanvas({
                 ? 'bg-[#E85002] text-[#000000] font-bold shadow-[0_0_15px_rgba(232,80,2,0.3)] border border-[#E85002]'
                 : 'bg-[#222222] text-[#A7A7A7] border border-[#333333]'
             }`}
-            title={isPhysicsRunning ? 'Pause Force Physics' : 'Resume Physics'}
+            title={isPhysicsRunning ? 'Pause Force Layout' : 'Start Force Layout'}
           >
             {isPhysicsRunning ? <Pause size={16} weight="bold" /> : <Play size={16} weight="fill" />}
           </button>
@@ -585,10 +655,15 @@ export default function InvestigationCanvas({
             Topology: <span className="font-bold text-[#E85002]">{nodes.length}</span> nodes,{' '}
             <span className="font-bold text-[#E85002]">{edges.length}</span> relationships
           </span>
+          <span className="text-[#646464]">|</span>
+          <span className="flex items-center gap-1.5">
+            <span className={`h-2 w-2 rounded-full ${isPhysicsRunning ? 'bg-[#E85002] animate-pulse' : 'bg-[#646464]'}`} />
+            {isPhysicsRunning ? 'Physics On' : 'Physics Off'}
+          </span>
         </div>
 
         <div className="px-4 py-2 rounded-2xl border shadow-md backdrop-blur-md bg-[#111111]/95 border-[#333333] text-[#A7A7A7]">
-          Click node or edge to inspect attributes
+          Click node to inspect · Drag to move
         </div>
       </div>
     </div>
