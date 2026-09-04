@@ -26,6 +26,8 @@ interface SimulatedNode extends GraphNode {
   vx: number;
   vy: number;
   radius: number;
+  dragTargetX?: number;
+  dragTargetY?: number;
 }
 
 export default function InvestigationCanvas({
@@ -36,10 +38,9 @@ export default function InvestigationCanvas({
   selectedEdgeId
 }: InvestigationCanvasProps) {
   const { theme } = useTheme();
-  const isDark = theme === 'dark' || true; // Enforce dark styling for this component
+  const isDark = theme === 'dark' || true;
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const containerRef = useRef<HTMLDivElement | null>(null);
 
   const [nodes, setNodes] = useState<SimulatedNode[]>([]);
   const [edges, setEdges] = useState<GraphEdge[]>([]);
@@ -53,13 +54,12 @@ export default function InvestigationCanvas({
   const draggedNodeRef = useRef<SimulatedNode | null>(null);
   const hoveredNodeRef = useRef<SimulatedNode | null>(null);
 
-  // Initialize or update nodes smoothly
   useEffect(() => {
     if (!data.nodes) return;
 
     setNodes(currentNodes => {
-      const width = canvasRef.current?.width || 1000;
-      const height = canvasRef.current?.height || 680;
+      const width = canvasRef.current?.width || 1400;
+      const height = canvasRef.current?.height || 1000;
       const centerX = width / 2;
       const centerY = height / 2;
 
@@ -70,11 +70,9 @@ export default function InvestigationCanvas({
         const radius = n.isIdentity ? 24 : Math.max(13, n.val * 0.78);
         
         if (existing) {
-          // Preserve physics positions
           return { ...existing, ...n, radius };
         }
         
-        // Spawn new node
         const angle = Math.random() * 2 * Math.PI;
         const dist = 100 + Math.random() * 200;
         return {
@@ -126,7 +124,7 @@ export default function InvestigationCanvas({
       ctx.scale(k, k);
 
       // Physics Simulation Step
-      if (isPhysicsRunning && !draggedNodeRef.current) {
+      if (isPhysicsRunning) {
         for (let i = 0; i < nodes.length; i++) {
           for (let j = i + 1; j < nodes.length; j++) {
             const n1 = nodes[i];
@@ -134,7 +132,6 @@ export default function InvestigationCanvas({
             const dx = n2.x - n1.x;
             const dy = n2.y - n1.y;
             const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-            // Increased spacing for categorical clarity
             const minDist = n1.radius + n2.radius + 80;
 
             if (dist < minDist) {
@@ -154,7 +151,6 @@ export default function InvestigationCanvas({
             const dx = tNode.x - sNode.x;
             const dy = tNode.y - sNode.y;
             const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-            // Increased edge length
             const targetDist = edge.relationshipName === 'RESOLVED_TO' ? 130 : 200;
             const force = (dist - targetDist) * 0.004;
             sNode.vx += dx * force;
@@ -165,17 +161,24 @@ export default function InvestigationCanvas({
         });
 
         nodes.forEach((n) => {
-          // Gravity to center
-          const gx = width / 2 - n.x;
-          const gy = height / 2 - n.y;
-          n.vx += gx * 0.0003;
-          n.vy += gy * 0.0003;
+          if (n.id === draggedNodeRef.current?.id) {
+            n.x = n.dragTargetX || n.x;
+            n.y = n.dragTargetY || n.y;
+            n.vx = 0;
+            n.vy = 0;
+          } else {
+            // Gravity to center
+            const gx = width / 2 - n.x;
+            const gy = height / 2 - n.y;
+            n.vx += gx * 0.0003;
+            n.vy += gy * 0.0003;
 
-          // Friction
-          n.vx *= 0.85;
-          n.vy *= 0.85;
-          n.x += n.vx;
-          n.y += n.vy;
+            // Friction
+            n.vx *= 0.85;
+            n.vy *= 0.85;
+            n.x += n.vx;
+            n.y += n.vy;
+          }
         });
       }
 
@@ -295,7 +298,6 @@ export default function InvestigationCanvas({
 
         ctx.save();
 
-        // Color Mapping
         let nodeColor = '#E85002';
         if (node.type === 'IDENTITY') nodeColor = '#E85002';
         else if (node.type === 'PERSON') nodeColor = '#F9F9F9';
@@ -310,7 +312,6 @@ export default function InvestigationCanvas({
         else if (node.type === 'USERNAME') nodeColor = '#EAB308';
         else if (node.type === 'DOCUMENT') nodeColor = '#94A3B8';
 
-        // Pulse ring if Identity, Search Match, or Selected
         if (node.isIdentity || matchesSearch || isSelected) {
           ctx.beginPath();
           ctx.arc(node.x, node.y, node.radius + 8, 0, 2 * Math.PI);
@@ -319,13 +320,11 @@ export default function InvestigationCanvas({
           ctx.stroke();
         }
 
-        // Node Body
         ctx.beginPath();
         ctx.arc(node.x, node.y, node.radius, 0, 2 * Math.PI);
         ctx.fillStyle = isDimmed ? 'rgba(51, 51, 51, 0.4)' : nodeColor;
         ctx.fill();
 
-        // Node Border
         ctx.strokeStyle = isSelected
           ? '#E85002'
           : isHovered
@@ -334,21 +333,18 @@ export default function InvestigationCanvas({
         ctx.lineWidth = isSelected ? 3 : isHovered ? 2 : 1.5;
         ctx.stroke();
 
-        // Label Pill
         ctx.font = 'bold 11px system-ui, -apple-system, sans-serif';
         ctx.textAlign = 'center';
 
         const labelText = node.label;
         const labelWidth = ctx.measureText(labelText).width;
 
-        // Label Box
         ctx.fillStyle = '#111111';
         ctx.fillRect(node.x - labelWidth / 2 - 5, node.y + node.radius + 4, labelWidth + 10, 16);
         ctx.strokeStyle = '#333333';
         ctx.lineWidth = 1;
         ctx.strokeRect(node.x - labelWidth / 2 - 5, node.y + node.radius + 4, labelWidth + 10, 16);
 
-        // Label Text
         ctx.fillStyle = isDimmed ? '#646464' : '#F9F9F9';
         ctx.fillText(labelText, node.x, node.y + node.radius + 16);
 
@@ -364,12 +360,27 @@ export default function InvestigationCanvas({
     return () => cancelAnimationFrame(animationFrameId);
   }, [nodes, edges, isPhysicsRunning, selectedNodeId, selectedEdgeId, searchQuery, selectedTypeFilter]);
 
-  const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  const getMousePos = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!canvas) return { mouseX: 0, mouseY: 0, rawX: 0, rawY: 0 };
     const rect = canvas.getBoundingClientRect();
-    const mouseX = (e.clientX - rect.left - transformRef.current.x) / transformRef.current.k;
-    const mouseY = (e.clientY - rect.top - transformRef.current.y) / transformRef.current.k;
+    
+    // Convert DOM CSS pixels to internal canvas buffer pixels
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    
+    const x = (e.clientX - rect.left) * scaleX;
+    const y = (e.clientY - rect.top) * scaleY;
+    
+    // Apply transform inverse for internal coordinates
+    const mouseX = (x - transformRef.current.x) / transformRef.current.k;
+    const mouseY = (y - transformRef.current.y) / transformRef.current.k;
+    
+    return { mouseX, mouseY, rawX: x, rawY: y };
+  };
+
+  const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    const { mouseX, mouseY, rawX, rawY } = getMousePos(e);
 
     const clickedNode = nodes.find((n) => {
       const dx = n.x - mouseX;
@@ -378,6 +389,10 @@ export default function InvestigationCanvas({
     });
 
     if (clickedNode) {
+      clickedNode.dragTargetX = mouseX;
+      clickedNode.dragTargetY = mouseY;
+      clickedNode.vx = 0;
+      clickedNode.vy = 0;
       draggedNodeRef.current = clickedNode;
       onSelectNode(clickedNode);
       return;
@@ -406,31 +421,32 @@ export default function InvestigationCanvas({
     }
 
     isDraggingCanvasRef.current = true;
-    dragStartRef.current = { x: e.clientX, y: e.clientY };
+    dragStartRef.current = { x: rawX, y: rawY };
   };
 
   const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const rect = canvas.getBoundingClientRect();
-    const mouseX = (e.clientX - rect.left - transformRef.current.x) / transformRef.current.k;
-    const mouseY = (e.clientY - rect.top - transformRef.current.y) / transformRef.current.k;
+    const { mouseX, mouseY, rawX, rawY } = getMousePos(e);
 
     if (draggedNodeRef.current) {
-      draggedNodeRef.current.x = mouseX;
-      draggedNodeRef.current.y = mouseY;
+      draggedNodeRef.current.dragTargetX = mouseX;
+      draggedNodeRef.current.dragTargetY = mouseY;
+      draggedNodeRef.current.vx = 0;
+      draggedNodeRef.current.vy = 0;
       return;
     }
 
     if (isDraggingCanvasRef.current) {
-      const dx = e.clientX - dragStartRef.current.x;
-      const dy = e.clientY - dragStartRef.current.y;
+      const dx = rawX - dragStartRef.current.x;
+      const dy = rawY - dragStartRef.current.y;
       transformRef.current.x += dx;
       transformRef.current.y += dy;
-      dragStartRef.current = { x: e.clientX, y: e.clientY };
+      dragStartRef.current = { x: rawX, y: rawY };
       return;
     }
 
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    
     const hovered = nodes.find((n) => {
       const dx = n.x - mouseX;
       const dy = n.y - mouseY;
@@ -438,11 +454,17 @@ export default function InvestigationCanvas({
     });
 
     hoveredNodeRef.current = hovered || null;
-    canvas.style.cursor = hovered ? 'pointer' : 'default';
+    canvas.style.cursor = hovered ? 'pointer' : (isDraggingCanvasRef.current ? 'grabbing' : 'grab');
   };
 
   const handleMouseUp = () => {
-    draggedNodeRef.current = null;
+    if (draggedNodeRef.current) {
+      draggedNodeRef.current.dragTargetX = undefined;
+      draggedNodeRef.current.dragTargetY = undefined;
+      draggedNodeRef.current.vx = 0;
+      draggedNodeRef.current.vy = 0;
+      draggedNodeRef.current = null;
+    }
     isDraggingCanvasRef.current = false;
   };
 
@@ -464,7 +486,7 @@ export default function InvestigationCanvas({
   };
 
   return (
-    <div className="relative w-full h-full">
+    <div className="relative w-full h-full bg-[#000000]">
       {/* Top Floating Controls Bar */}
       <div className="absolute top-4 left-4 right-4 z-20 flex flex-wrap items-center justify-between gap-3 pointer-events-none">
         {/* Left: Search & Filter */}
@@ -533,7 +555,7 @@ export default function InvestigationCanvas({
             onClick={() => setIsPhysicsRunning((prev) => !prev)}
             className={`p-2 rounded-xl transition-colors cursor-pointer ${
               isPhysicsRunning
-                ? 'bg-[#E85002] text-[#F9F9F9] font-bold shadow-md shadow-[#E85002]/25 border border-[#E85002]'
+                ? 'bg-[#E85002] text-[#000000] font-bold shadow-[0_0_15px_rgba(232,80,2,0.3)] border border-[#E85002]'
                 : 'bg-[#222222] text-[#A7A7A7] border border-[#333333]'
             }`}
             title={isPhysicsRunning ? 'Pause Force Physics' : 'Resume Physics'}
@@ -551,8 +573,9 @@ export default function InvestigationCanvas({
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
         onWheel={handleWheel}
-        className="w-full h-full cursor-grab active:cursor-grabbing"
+        className="w-full h-full cursor-grab active:cursor-grabbing outline-none"
       />
 
       {/* Bottom Status Bar */}

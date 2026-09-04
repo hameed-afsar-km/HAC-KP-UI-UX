@@ -6,10 +6,7 @@ import { getEntityTypes, getEntityAttributes } from '@/lib/api';
 import { EntityType, EntityAttribute } from '@/lib/types';
 import {
   MagnifyingGlass,
-  Funnel,
-  CheckCircle,
   CaretRight,
-  Database
 } from '@phosphor-icons/react';
 
 export default function EntityTypesPage() {
@@ -58,39 +55,39 @@ export default function EntityTypesPage() {
   return (
     <div className="space-y-6">
       {/* Search and Filters Bar */}
-      <div className="rounded-3xl border transition-colors duration-200 bg-white border-[#E2E2E2] dark:bg-[#121212] dark:border-[#333333] p-4 sm:p-5 shadow-xs flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+      <div className="rounded-[2rem] border transition-colors duration-200 bg-white dark:bg-[#111111] border-[#E2E6F0] dark:border-[#333333] p-4 sm:p-5 shadow-sm dark:shadow-2xl flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
         <div className="relative flex-1 max-w-md">
           <MagnifyingGlass
-            size={16}
+            size={18}
             weight="bold"
-            className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#E85002]"
+            className="absolute left-4 top-1/2 -translate-y-1/2 text-[#8B95AD] dark:text-[#646464]"
           />
           <input
             type="text"
             placeholder="Search entity classes, labels, schemas..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 rounded-2xl border border-[#E2E2E2] dark:border-[#333333] bg-[#F0F0F0] dark:bg-[#000000] text-xs text-[#000000] dark:text-[#F9F9F9] placeholder-[#646464] dark:placeholder-[#A7A7A7] outline-none focus:border-[#E85002]"
+            className="w-full pl-11 pr-4 py-2.5 rounded-xl border border-[#E2E6F0] dark:border-[#333333] bg-[#F6F7FB] dark:bg-[#000000] text-[13px] text-[#0D0F14] dark:text-[#F9F9F9] placeholder-[#8B95AD] dark:placeholder-[#646464] outline-none focus:border-[#E85002] shadow-inner transition-colors"
           />
         </div>
 
         <div className="flex items-center gap-2 font-mono text-xs">
           <button
             onClick={() => setStatusFilter('ALL')}
-            className={`px-3 py-1.5 rounded-xl border transition-colors cursor-pointer ${
+            className={`px-4 py-2.5 rounded-xl border uppercase tracking-wider font-bold transition-all cursor-pointer ${
               statusFilter === 'ALL'
-                ? 'bg-[#E85002] text-white font-bold border-[#E85002]'
-                : 'border-[#E2E2E2] dark:border-[#333333] text-[#646464] dark:text-[#A7A7A7]'
+                ? 'bg-[#E85002] text-white border-[#E85002] shadow-[0_0_15px_rgba(232,80,2,0.3)]'
+                : 'bg-white dark:bg-[#000000] border-[#E2E6F0] dark:border-[#333333] text-[#8B95AD] dark:text-[#A7A7A7] hover:border-[#E85002]/50 hover:text-[#0D0F14] dark:hover:text-[#F9F9F9]'
             }`}
           >
             All Classes
           </button>
           <button
             onClick={() => setStatusFilter('Y')}
-            className={`px-3 py-1.5 rounded-xl border transition-colors cursor-pointer ${
+            className={`px-4 py-2.5 rounded-xl border uppercase tracking-wider font-bold transition-all cursor-pointer ${
               statusFilter === 'Y'
-                ? 'bg-[#E85002] text-white font-bold border-[#E85002]'
-                : 'border-[#E2E2E2] dark:border-[#333333] text-[#646464] dark:text-[#A7A7A7]'
+                ? 'bg-[#E85002] text-white border-[#E85002] shadow-[0_0_15px_rgba(232,80,2,0.3)]'
+                : 'bg-white dark:bg-[#000000] border-[#E2E6F0] dark:border-[#333333] text-[#8B95AD] dark:text-[#A7A7A7] hover:border-[#E85002]/50 hover:text-[#0D0F14] dark:hover:text-[#F9F9F9]'
             }`}
           >
             Standard Only
@@ -99,13 +96,13 @@ export default function EntityTypesPage() {
       </div>
 
       {/* Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {isLoading ? (
-          <div className="col-span-full py-16 text-center text-xs font-mono text-[#646464] dark:text-[#A7A7A7]">
+          <div className="col-span-full py-16 text-center text-[12px] font-mono font-bold text-[#8B95AD] dark:text-[#646464] uppercase tracking-widest">
             Loading entity schema definitions...
           </div>
         ) : filteredTypes.length === 0 ? (
-          <div className="col-span-full py-16 text-center text-xs font-mono text-[#646464] dark:text-[#A7A7A7]">
+          <div className="col-span-full py-16 text-center text-[12px] font-mono font-bold text-[#8B95AD] dark:text-[#646464] uppercase tracking-widest">
             No entity types match your search criteria.
           </div>
         ) : (
@@ -116,36 +113,37 @@ export default function EntityTypesPage() {
               <Link
                 key={ent.id}
                 href={`/ontology/entities/${ent.id}`}
-                className="p-5 rounded-3xl bg-white hover:border-[#E85002] dark:bg-[#121212] dark:hover:border-[#E85002] border border-[#E2E2E2] dark:border-[#333333] transition-all flex flex-col justify-between space-y-4 shadow-xs hover:shadow-md group"
+                className="group relative flex flex-col justify-between p-6 rounded-3xl bg-white dark:bg-[#111111] border border-[#E2E6F0] dark:border-[#333333] hover:border-[#E85002] transition-all duration-300 shadow-sm dark:shadow-xl overflow-hidden animate-fade-up"
               >
-                <div className="space-y-3">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-[radial-gradient(circle_at_top_right,rgba(232,80,2,0.1)_0%,transparent_70%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                
+                <div className="relative z-10 space-y-4">
                   <div className="flex items-center justify-between">
-                    <span className="px-2.5 py-0.5 rounded-lg text-[10px] font-mono font-bold bg-[#E85002]/15 text-[#E85002] border border-[#E85002]/30">
+                    <span className="px-2.5 py-1 rounded-md text-[10px] font-mono font-bold uppercase tracking-wider bg-[#E85002]/20 text-[#E85002] border border-[#E85002]/50">
                       ID #{ent.id}
                     </span>
-
-                    <span className="text-[10px] font-mono text-[#646464] dark:text-[#A7A7A7]">
+                    <span className="text-[11px] font-mono font-bold text-[#8B95AD] dark:text-[#646464] bg-[#F6F7FB] dark:bg-[#000000] px-2.5 py-1 rounded-md border border-[#E2E6F0] dark:border-[#333333]">
                       {count} Attributes
                     </span>
                   </div>
 
-                  <div className="space-y-1">
-                    <h3 className="text-base font-bold text-[#000000] dark:text-[#F9F9F9] group-hover:text-[#E85002] transition-colors">
+                  <div className="space-y-1.5">
+                    <h3 className="text-[16px] font-bold text-[#0D0F14] dark:text-[#F9F9F9] group-hover:text-[#E85002] transition-colors leading-snug">
                       {ent.label}
                     </h3>
-                    <div className="text-xs font-mono text-[#E85002] font-semibold">
+                    <div className="text-[11px] font-mono font-bold text-[#E85002]">
                       {ent.entityName}
                     </div>
-                    <p className="text-xs text-[#646464] dark:text-[#A7A7A7] line-clamp-2 leading-relaxed pt-1">
+                    <p className="text-[13px] text-[#8B95AD] dark:text-[#A7A7A7] line-clamp-2 leading-relaxed pt-2">
                       {ent.entityDescription}
                     </p>
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between pt-3 border-t border-[#E2E2E2] dark:border-[#333333] text-xs font-mono text-[#646464] dark:text-[#A7A7A7]">
+                <div className="relative z-10 flex items-center justify-between pt-4 mt-4 border-t border-[#E2E6F0] dark:border-[#333333] text-[11px] font-mono font-bold text-[#8B95AD] dark:text-[#646464] uppercase tracking-wider">
                   <span>{ent.isStandard === 'Y' ? 'Standard Schema' : 'Custom Extension'}</span>
-                  <span className="text-[#E85002] font-bold group-hover:underline flex items-center gap-1">
-                    Inspect Schema <CaretRight size={12} weight="bold" />
+                  <span className="text-[#E85002] font-black flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                    Inspect <CaretRight size={14} weight="bold" />
                   </span>
                 </div>
               </Link>

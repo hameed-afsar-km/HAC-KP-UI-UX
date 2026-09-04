@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
+import { Geist, Geist_Mono, Space_Grotesk } from 'next/font/google';
 import { ThemeProvider } from '@/components/theme/ThemeProvider';
 import AppLayoutShell from '@/components/navigation/AppLayoutShell';
 import './globals.css';
@@ -14,6 +14,11 @@ const geistMono = Geist_Mono({
   subsets: ['latin'],
 });
 
+const spaceGrotesk = Space_Grotesk({
+  variable: '--font-space-grotesk',
+  subsets: ['latin'],
+});
+
 export const metadata: Metadata = {
   title: 'T7 Cross-Device Entity Resolution & Network Mapping',
   description: 'Forensic Intelligence & AML Investigation Platform for Multi-Modal Entity Extraction, Quality Review, Cross-Device Resolution, and Network Graphs',
@@ -25,7 +30,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning className={`${geistSans.variable} ${geistMono.variable} h-full`}>
+    <html lang="en" suppressHydrationWarning className={`${geistSans.variable} ${geistMono.variable} ${spaceGrotesk.variable} h-full`}>
       <body className="min-h-full flex flex-col font-sans antialiased bg-[#F9F9F9] dark:bg-[#000000] text-[#000000] dark:text-[#F9F9F9] selection:bg-[#E85002] selection:text-white">
         <ThemeProvider>
           <AppLayoutShell>

@@ -23,7 +23,6 @@ export default function InvestigationGraphPage() {
   const [selectedNode, setSelectedNode] = useState<GraphNode | null>(null);
   const [selectedEdge, setSelectedEdge] = useState<GraphEdge | null>(null);
   
-  // Entity Selection State
   const [enabledNodes, setEnabledNodes] = useState<Set<string>>(new Set());
   const [reconstructKey, setReconstructKey] = useState(0);
 
@@ -31,7 +30,6 @@ export default function InvestigationGraphPage() {
     if (caseId) {
       const data = getInvestigationGraph(caseId);
       setGraphData(data);
-      // Initially start with all nodes enabled (or could start empty based on user pref)
       setEnabledNodes(new Set(data.nodes.map(n => n.id)));
     }
   }, [caseId]);
@@ -67,14 +65,11 @@ export default function InvestigationGraphPage() {
   };
 
   const reconstructGraph = () => {
-    // Incrementing key forces the canvas to remount, thus resetting physics and layout
     setReconstructKey(k => k + 1);
   };
 
-  // Filter the graph data based on enabled nodes
   const activeGraphData = useMemo(() => {
     const nodes = graphData.nodes.filter(n => enabledNodes.has(n.id));
-    // Edges are only active if BOTH source and target are enabled
     const edges = graphData.edges.filter(e => enabledNodes.has(e.source) && enabledNodes.has(e.target));
     return { nodes, edges };
   }, [graphData, enabledNodes]);
@@ -91,7 +86,6 @@ export default function InvestigationGraphPage() {
     { label: 'LOCATION', color: '#64748B', desc: 'Terminal Place' }
   ];
 
-  // Group nodes by category for the sidebar
   const groupedNodes = useMemo(() => {
     const groups: Record<string, GraphNode[]> = {};
     graphData.nodes.forEach(n => {
@@ -109,10 +103,10 @@ export default function InvestigationGraphPage() {
           <div className="flex items-center gap-2 text-xs font-mono font-bold text-[#E85002]">
             <span>INVESTIGATION STAGE 06 // FORENSIC KNOWLEDGE GRAPH</span>
           </div>
-          <h2 className="text-xl sm:text-2xl font-extrabold tracking-tight text-[#000000] dark:text-[#F9F9F9] mt-1">
+          <h2 className="text-xl sm:text-2xl font-extrabold tracking-tight text-[#0D0F14] dark:text-[#F9F9F9] mt-1">
             Network Mapping &amp; Link Analysis
           </h2>
-          <p className="text-xs text-[#646464] dark:text-[#A7A7A7]">
+          <p className="text-xs text-[#8B95AD] dark:text-[#646464]">
             Interactive topology. Use the builder pane to construct the graph manually.
           </p>
         </div>
@@ -120,7 +114,7 @@ export default function InvestigationGraphPage() {
         <div className="flex items-center gap-3">
           <Link
             href={`/cases/${caseId}`}
-            className="flex items-center gap-2 rounded-2xl bg-[#000000] hover:bg-[#222222] border border-[#333333] text-[#F9F9F9] px-4 py-2 text-xs font-bold font-mono transition-colors"
+            className="flex items-center gap-2 rounded-2xl bg-white dark:bg-[#000000] hover:bg-[#F6F7FB] dark:hover:bg-[#222222] border border-[#E2E6F0] dark:border-[#333333] text-[#0D0F14] dark:text-[#F9F9F9] px-4 py-2 text-xs font-bold font-mono transition-colors"
           >
             <ArrowLeft size={14} weight="bold" />
             <span>Case Overview</span>
@@ -129,23 +123,23 @@ export default function InvestigationGraphPage() {
       </div>
 
       <div className="flex flex-col lg:flex-row gap-4 h-[680px]">
-        {/* Graph Builder Pane (Left Side) */}
-        <div className="w-full lg:w-80 flex-shrink-0 flex flex-col bg-[#000000] border border-[#333333] rounded-3xl overflow-hidden shadow-2xl">
-          <div className="p-4 border-b border-[#333333] bg-[#111111] flex flex-col gap-3">
-            <h3 className="text-[12px] font-mono font-bold text-[#F9F9F9] uppercase tracking-widest">
+        {/* Graph Builder Pane */}
+        <div className="w-full lg:w-80 flex-shrink-0 flex flex-col bg-white dark:bg-[#000000] border border-[#E2E6F0] dark:border-[#333333] rounded-3xl overflow-hidden shadow-sm dark:shadow-2xl">
+          <div className="p-4 border-b border-[#E2E6F0] dark:border-[#333333] bg-[#F6F7FB] dark:bg-[#111111] flex flex-col gap-3">
+            <h3 className="text-[12px] font-mono font-bold text-[#0D0F14] dark:text-[#F9F9F9] uppercase tracking-widest">
               Entity Builder
             </h3>
             
             <div className="flex items-center gap-2">
               <button
                 onClick={() => toggleAll(true)}
-                className="flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg bg-[#222222] hover:bg-[#333333] border border-[#333333] text-[#F9F9F9] text-[10px] font-bold font-mono uppercase transition-colors"
+                className="flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg bg-[#F6F7FB] dark:bg-[#222222] hover:bg-[#E2E6F0] dark:hover:bg-[#333333] border border-[#E2E6F0] dark:border-[#333333] text-[#0D0F14] dark:text-[#F9F9F9] text-[10px] font-bold font-mono uppercase transition-colors"
               >
                 <CheckSquareOffset size={14} /> All
               </button>
               <button
                 onClick={() => toggleAll(false)}
-                className="flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg bg-[#222222] hover:bg-[#333333] border border-[#333333] text-[#F9F9F9] text-[10px] font-bold font-mono uppercase transition-colors"
+                className="flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg bg-[#F6F7FB] dark:bg-[#222222] hover:bg-[#E2E6F0] dark:hover:bg-[#333333] border border-[#E2E6F0] dark:border-[#333333] text-[#0D0F14] dark:text-[#F9F9F9] text-[10px] font-bold font-mono uppercase transition-colors"
               >
                 <Square size={14} /> None
               </button>
@@ -159,7 +153,7 @@ export default function InvestigationGraphPage() {
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-4 space-y-6 scrollbar-thin scrollbar-thumb-[#333333]">
+          <div className="flex-1 overflow-y-auto p-4 space-y-6 scrollbar-thin scrollbar-thumb-[#E2E6F0] dark:scrollbar-thumb-[#333333]">
             {Object.entries(groupedNodes).map(([type, nodes]) => (
               <div key={type}>
                 <h4 className="text-[10px] font-mono font-bold text-[#E85002] uppercase tracking-widest mb-2 px-1">
@@ -169,26 +163,27 @@ export default function InvestigationGraphPage() {
                   {nodes.map(node => {
                     const isChecked = enabledNodes.has(node.id);
                     return (
-                      <label
+                      <div
                         key={node.id}
-                        className="flex items-start gap-2 p-2 rounded-xl hover:bg-[#111111] border border-transparent hover:border-[#333333] cursor-pointer transition-colors group"
+                        onClick={() => toggleNode(node.id)}
+                        className="flex items-start gap-2 p-2 rounded-xl hover:bg-[#F6F7FB] dark:hover:bg-[#111111] border border-transparent hover:border-[#E2E6F0] dark:hover:border-[#333333] cursor-pointer transition-colors group"
                       >
                         <div className="mt-0.5">
                           {isChecked ? (
                             <CheckSquareOffset size={16} weight="fill" className="text-[#E85002]" />
                           ) : (
-                            <Square size={16} className="text-[#646464] group-hover:text-[#A7A7A7]" />
+                            <Square size={16} className="text-[#8B95AD] dark:text-[#646464] group-hover:text-[#A7A7A7]" />
                           )}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className={`text-[12px] font-bold truncate transition-colors ${isChecked ? 'text-[#F9F9F9]' : 'text-[#646464] group-hover:text-[#A7A7A7]'}`}>
+                          <p className={`text-[12px] font-bold truncate transition-colors ${isChecked ? 'text-[#0D0F14] dark:text-[#F9F9F9]' : 'text-[#8B95AD] dark:text-[#646464] group-hover:text-[#A7A7A7]'}`}>
                             {node.label}
                           </p>
-                          <p className="text-[10px] font-mono text-[#646464] truncate">
+                          <p className="text-[10px] font-mono text-[#8B95AD] dark:text-[#646464] truncate">
                             {node.id}
                           </p>
                         </div>
-                      </label>
+                      </div>
                     );
                   })}
                 </div>
@@ -197,10 +192,10 @@ export default function InvestigationGraphPage() {
           </div>
         </div>
 
-        {/* Main Interactive Canvas Container */}
-        <div className="relative flex-1 rounded-3xl overflow-hidden border border-[#333333] bg-[#000000]">
+        {/* Main Interactive Canvas */}
+        <div className="relative flex-1 rounded-3xl overflow-hidden border border-[#E2E6F0] dark:border-[#333333] bg-[#000000]">
           <InvestigationCanvas
-            key={reconstructKey} // Force remount on rebuild
+            key={reconstructKey}
             data={activeGraphData}
             onSelectNode={handleSelectNode}
             onSelectEdge={handleSelectEdge}
@@ -208,7 +203,6 @@ export default function InvestigationGraphPage() {
             selectedEdgeId={selectedEdge?.id}
           />
 
-          {/* Slide-over Inspection Drawers */}
           <EntityDetailsDrawer
             node={selectedNode}
             onClose={() => setSelectedNode(null)}
@@ -221,10 +215,10 @@ export default function InvestigationGraphPage() {
         </div>
       </div>
 
-      {/* Legend & Multi-Modal Type Bar */}
-      <div className="rounded-3xl border bg-[#000000] border-[#333333] p-4 shadow-xs">
+      {/* Legend */}
+      <div className="rounded-3xl border bg-white dark:bg-[#000000] border-[#E2E6F0] dark:border-[#333333] p-4 shadow-xs">
         <div className="flex flex-wrap items-center justify-between gap-3 text-xs font-mono">
-          <span className="font-bold text-[#A7A7A7] text-[10px] uppercase">
+          <span className="font-bold text-[#8B95AD] dark:text-[#A7A7A7] text-[10px] uppercase">
             Ontology Legend:
           </span>
 
@@ -235,7 +229,7 @@ export default function InvestigationGraphPage() {
                   className="h-3 w-3 rounded-full border border-black/20"
                   style={{ backgroundColor: item.color }}
                 />
-                <span className="text-[11px] font-bold text-[#F9F9F9]">
+                <span className="text-[11px] font-bold text-[#0D0F14] dark:text-[#F9F9F9]">
                   {item.label}
                 </span>
               </div>

@@ -47,11 +47,11 @@ const STAGES = (id: string) => [
 
 function stageBadge(kind: string) {
   switch (kind) {
-    case 'done':    return 'badge badge-green';
-    case 'running': return 'badge badge-blue';
-    case 'warn':    return 'badge badge-amber';
-    case 'urgent':  return 'badge badge-orange';
-    default:        return 'badge badge-muted';
+    case 'done':    return 'bg-[#E85002]/20 text-[#E85002] border-[#E85002]/50';
+    case 'running': return 'bg-blue-600/20 text-blue-500 border-blue-500/50';
+    case 'warn':    return 'bg-amber-500/20 text-amber-500 border-amber-500/50';
+    case 'urgent':  return 'bg-[#C10801]/20 text-[#C10801] border-[#C10801]/50';
+    default:        return 'bg-[#E2E6F0] dark:bg-[#333333] text-[#8B95AD] dark:text-[#A7A7A7] border-[#E2E6F0] dark:border-[#646464]';
   }
 }
 
@@ -75,17 +75,17 @@ export default async function CaseOverviewPage({ params }: { params: Promise<{ i
   return (
     <div className="space-y-5 animate-fade-up">
 
-      {/* ── Workflow Grid ────────────────────────────────────────────────── */}
-      <div className="bg-white dark:bg-[#161B27] border border-[#E2E6F0] dark:border-[#252D3E] rounded-2xl overflow-hidden shadow-sm">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[#E2E6F0] dark:border-[#252D3E]">
+      {/* Workflow Grid */}
+      <div className="bg-white dark:bg-[#111111] border border-[#E2E6F0] dark:border-[#333333] rounded-[2rem] overflow-hidden shadow-sm dark:shadow-2xl">
+        <div className="flex items-center justify-between px-8 py-5 border-b border-[#E2E6F0] dark:border-[#333333] bg-[#F6F7FB] dark:bg-[#000000]">
           <div>
-            <h2 className="text-[15px] font-bold text-[#0D0F14] dark:text-[#EEF0F6]">Investigation Steps</h2>
-            <p className="text-[12px] text-[#8B95AD] mt-0.5">Follow each step in order to build your case</p>
+            <h2 className="text-[16px] font-black text-[#0D0F14] dark:text-[#F9F9F9]">Investigation Steps</h2>
+            <p className="text-[13px] text-[#8B95AD] dark:text-[#A7A7A7] mt-1">Follow each step in order to build your case</p>
           </div>
-          <span className="text-[11px] font-semibold text-[#8B95AD]">6 stages</span>
+          <span className="text-[12px] font-mono font-bold text-[#E85002] uppercase tracking-widest bg-[#E85002]/10 px-3 py-1 rounded-full border border-[#E85002]/30">6 stages</span>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 divide-y md:divide-x md:divide-y divide-[#E2E6F0] dark:divide-[#252D3E]">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 divide-y md:divide-x md:divide-y divide-[#E2E6F0] dark:divide-[#333333]">
           {stages.map((stage, idx) => {
             const Icon = stage.icon;
             const StatusIcon = stageIcon(stage.statusKind);
@@ -94,37 +94,37 @@ export default async function CaseOverviewPage({ params }: { params: Promise<{ i
                 key={stage.num}
                 href={stage.href}
                 className={`
-                  group flex flex-col p-6 hover:bg-[#F6F7FB] dark:hover:bg-[#1E2435]
-                  transition-all duration-150 relative animate-fade-up
+                  group flex flex-col p-8 hover:bg-[#F6F7FB] dark:hover:bg-[#000000] transition-all duration-300 relative animate-fade-up overflow-hidden
                   ${idx < 3 ? `stagger-${idx + 1}` : `stagger-${idx - 2}`}
                 `}
               >
-                {/* Top row */}
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[11px] font-bold font-mono text-[#8B95AD]">{stage.num}</span>
-                    <span className={stageBadge(stage.statusKind)}>
-                      <StatusIcon size={11} weight={stage.statusKind === 'done' ? 'fill' : 'regular'} />
+                <div className="absolute top-0 right-0 w-24 h-24 bg-[radial-gradient(circle_at_top_right,rgba(232,80,2,0.1)_0%,transparent_70%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                
+                <div className="relative z-10 flex items-start justify-between mb-6">
+                  <div className="flex items-center gap-3">
+                    <span className="text-[14px] font-black font-mono text-[#E85002]">{stage.num}</span>
+                    <span className={`px-2.5 py-1 rounded-md text-[10px] font-mono font-bold uppercase tracking-wider border flex items-center gap-1.5 ${stageBadge(stage.statusKind)}`}>
+                      <StatusIcon size={12} weight={stage.statusKind === 'done' ? 'fill' : 'bold'} />
                       {stage.status}
                     </span>
                   </div>
-                  <div className="p-2 rounded-xl bg-[#F1F3F9] dark:bg-[#0E1117] group-hover:bg-[#E85002]/10 transition-colors">
-                    <Icon size={16} weight="regular" className="text-[#8B95AD] group-hover:text-[#E85002] transition-colors" />
+                  <div className="p-2.5 rounded-xl bg-[#F6F7FB] dark:bg-[#000000] border border-[#E2E6F0] dark:border-[#333333] group-hover:bg-[#E85002] group-hover:border-[#E85002] transition-colors duration-300">
+                    <Icon size={18} weight="regular" className="text-[#8B95AD] dark:text-[#A7A7A7] group-hover:text-white transition-colors" />
                   </div>
                 </div>
 
-                {/* Content */}
-                <h3 className="text-[14px] font-bold text-[#0D0F14] dark:text-[#EEF0F6] group-hover:text-[#E85002] transition-colors leading-snug">
-                  {stage.title}
-                </h3>
-                <p className="text-[12px] text-[#8B95AD] mt-2 leading-relaxed flex-1">{stage.desc}</p>
+                <div className="relative z-10 flex-1">
+                  <h3 className="text-[16px] font-bold text-[#0D0F14] dark:text-[#F9F9F9] group-hover:text-[#E85002] transition-colors leading-snug">
+                    {stage.title}
+                  </h3>
+                  <p className="text-[13px] text-[#8B95AD] dark:text-[#A7A7A7] mt-3 leading-relaxed">{stage.desc}</p>
+                </div>
 
-                {/* Footer */}
-                <div className="flex items-center justify-between mt-4 pt-4 border-t border-[#E2E6F0] dark:border-[#252D3E]">
-                  <span className="text-[11px] font-semibold text-[#8B95AD]">{stage.count}</span>
-                  <div className="flex items-center gap-1 text-[12px] font-semibold text-[#8B95AD] group-hover:text-[#E85002] transition-colors">
+                <div className="relative z-10 flex items-center justify-between mt-6 pt-4 border-t border-[#E2E6F0] dark:border-[#333333]">
+                  <span className="text-[12px] font-mono font-bold text-[#8B95AD] dark:text-[#646464]">{stage.count}</span>
+                  <div className="flex items-center gap-1.5 text-[12px] font-bold text-[#8B95AD] dark:text-[#A7A7A7] group-hover:text-[#E85002] transition-colors uppercase tracking-widest">
                     <span>Open</span>
-                    <ArrowRight size={13} className="group-hover:translate-x-0.5 transition-transform" />
+                    <ArrowRight size={14} weight="bold" className="group-hover:translate-x-1 transition-transform" />
                   </div>
                 </div>
               </Link>
