@@ -32,7 +32,7 @@ function createBeam(width: number, height: number): Beam {
     length: height * 2.5,
     angle,
     speed: 0.6 + Math.random() * 1.2,
-    opacity: 0.12 + Math.random() * 0.1,
+    opacity: 0.18 + Math.random() * 0.12,
     hue: 16 + Math.random() * 8,
     pulse: Math.random() * Math.PI * 2,
     pulseSpeed: 0.02 + Math.random() * 0.03,
@@ -83,7 +83,7 @@ export function BeamsBackground({
         beam.width = 140 + Math.random() * 160;
         beam.speed = 0.5 + Math.random() * 0.4;
         beam.hue = 16 + (index * 8) / totalBeams;
-        beam.opacity = 0.12 + Math.random() * 0.1;
+        beam.opacity = 0.18 + Math.random() * 0.12;
       }
 
       ctx.save();
@@ -148,27 +148,22 @@ export function BeamsBackground({
 
   if (prefersReducedMotion.current) {
     return (
-      <div className={cn("relative min-h-screen w-full overflow-hidden bg-black", className)}>
+      <div className={cn("relative min-h-screen", className)}>
         {children}
       </div>
     );
   }
 
   return (
-    <div
-      className={cn(
-        "relative min-h-screen w-full overflow-hidden bg-[#0a0a0a]",
-        className
-      )}
-    >
+    <div className={cn("relative min-h-screen", className)}>
       <canvas
         ref={canvasRef}
-        className="absolute inset-0"
+        className="fixed inset-0 -z-10"
         style={{ filter: "blur(30px)", willChange: "transform" }}
       />
 
       <motion.div
-        className="absolute inset-0"
+        className="fixed inset-0 -z-10"
         animate={{
           opacity: [0.02, 0.08, 0.02],
         }}
