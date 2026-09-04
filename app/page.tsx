@@ -1,6 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { getCases } from '@/lib/api';
+import { BeamsBackground } from '@/components/ui/beams-background';
 import {
   Briefcase,
   Fingerprint,
@@ -62,7 +63,8 @@ export default async function DashboardPage() {
   const total  = cases.length;
 
   return (
-    <div className="space-y-8 pb-20 mt-4">
+    <BeamsBackground intensity="subtle">
+    <div className="space-y-8 pb-20 mt-4 px-4 sm:px-6 lg:px-8">
 
       {/* ── Welcome Header ──────────────────────────────────────────────── */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 animate-slide-in-up">
@@ -210,5 +212,6 @@ export default async function DashboardPage() {
         </div>
       </div>
     </div>
+    </BeamsBackground>
   );
 }

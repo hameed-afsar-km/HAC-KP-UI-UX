@@ -28,12 +28,12 @@ function createBeam(width: number, height: number): Beam {
   return {
     x: Math.random() * width * 1.5 - width * 0.25,
     y: Math.random() * height * 1.5 - height * 0.25,
-    width: 30 + Math.random() * 60,
+    width: 40 + Math.random() * 80,
     length: height * 2.5,
     angle,
     speed: 0.6 + Math.random() * 1.2,
-    opacity: 0.08 + Math.random() * 0.12,
-    hue: 20 + Math.random() * 20,
+    opacity: 0.25 + Math.random() * 0.2,
+    hue: 20 + Math.random() * 15,
     pulse: Math.random() * Math.PI * 2,
     pulseSpeed: 0.02 + Math.random() * 0.03,
   };
@@ -41,18 +41,18 @@ function createBeam(width: number, height: number): Beam {
 
 export function BeamsBackground({
   className,
-  intensity = "subtle",
+  intensity = "medium",
   children,
 }: AnimatedGradientBackgroundProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const beamsRef = useRef<Beam[]>([]);
   const animationFrameRef = useRef<number>(0);
   const prefersReducedMotion = useRef(false);
-  const BEAM_COUNT = 10;
+  const BEAM_COUNT = 12;
 
   const opacityMap: Record<string, number> = {
-    subtle: 0.7,
-    medium: 0.85,
+    subtle: 0.8,
+    medium: 1,
     strong: 1,
   };
 
@@ -62,7 +62,13 @@ export function BeamsBackground({
     if (!canvas || !ctx) return;
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.filter = "blur(35px)";
+
+    const dpr = window.devicePixelRatio || 1;
+    const logicalW = canvas.width / dpr;
+    const logicalH = canvas.height / dpr;
+
+    ctx.save();
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
     const totalBeams = beamsRef.current.length;
     beamsRef.current.forEach((beam, index) => {
@@ -71,13 +77,13 @@ export function BeamsBackground({
 
       if (beam.y + beam.length < -100) {
         const column = index % 3;
-        const spacing = canvas.width / 3;
-        beam.y = canvas.height + 100;
+        const spacing = logicalW / 3;
+        beam.y = logicalH + 100;
         beam.x = column * spacing + spacing / 2 + (Math.random() - 0.5) * spacing * 0.5;
-        beam.width = 100 + Math.random() * 100;
+        beam.width = 100 + Math.random() * 120;
         beam.speed = 0.5 + Math.random() * 0.4;
-        beam.hue = 20 + (index * 20) / totalBeams;
-        beam.opacity = 0.12 + Math.random() * 0.08;
+        beam.hue = 20 + (index * 15) / totalBeams;
+        beam.opacity = 0.25 + Math.random() * 0.2;
       }
 
       ctx.save();
@@ -85,21 +91,24 @@ export function BeamsBackground({
       ctx.rotate((beam.angle * Math.PI) / 180);
 
       const pulsingOpacity =
-        beam.opacity * (0.8 + Math.sin(beam.pulse) * 0.2) * opacityMap[intensity];
+        beam.opacity * (0.85 + Math.sin(beam.pulse) * 0.15) * opacityMap[intensity];
 
       const gradient = ctx.createLinearGradient(0, 0, 0, beam.length);
-      gradient.addColorStop(0, `hsla(${beam.hue}, 90%, 50%, 0)`);
-      gradient.addColorStop(0.1, `hsla(${beam.hue}, 90%, 50%, ${pulsingOpacity * 0.5})`);
-      gradient.addColorStop(0.4, `hsla(${beam.hue}, 90%, 50%, ${pulsingOpacity})`);
-      gradient.addColorStop(0.6, `hsla(${beam.hue}, 90%, 50%, ${pulsingOpacity})`);
-      gradient.addColorStop(0.9, `hsla(${beam.hue}, 90%, 50%, ${pulsingOpacity * 0.5})`);
-      gradient.addColorStop(1, `hsla(${beam.hue}, 90%, 50%, 0)`);
+      gradient.addColorStop(0, `hsla(${beam.hue}, 85%, 55%, 0)`);
+      gradient.addColorStop(0.05, `hsla(${beam.hue}, 85%, 55%, ${pulsingOpacity * 0.3})`);
+      gradient.addColorStop(0.15, `hsla(${beam.hue}, 85%, 55%, ${pulsingOpacity * 0.7})`);
+      gradient.addColorStop(0.35, `hsla(${beam.hue}, 85%, 55%, ${pulsingOpacity})`);
+      gradient.addColorStop(0.65, `hsla(${beam.hue}, 85%, 55%, ${pulsingOpacity})`);
+      gradient.addColorStop(0.85, `hsla(${beam.hue}, 85%, 55%, ${pulsingOpacity * 0.7})`);
+      gradient.addColorStop(0.95, `hsla(${beam.hue}, 85%, 55%, ${pulsingOpacity * 0.3})`);
+      gradient.addColorStop(1, `hsla(${beam.hue}, 85%, 55%, 0)`);
 
       ctx.fillStyle = gradient;
       ctx.fillRect(-beam.width / 2, 0, beam.width, beam.length);
       ctx.restore();
     });
 
+    ctx.restore();
     animationFrameRef.current = requestAnimationFrame(animate);
   }, [intensity]);
 
@@ -119,10 +128,9 @@ export function BeamsBackground({
       canvas.height = window.innerHeight * dpr;
       canvas.style.width = `${window.innerWidth}px`;
       canvas.style.height = `${window.innerHeight}px`;
-      ctx.scale(dpr, dpr);
 
       beamsRef.current = Array.from({ length: BEAM_COUNT }, () =>
-        createBeam(canvas.width, canvas.height)
+        createBeam(window.innerWidth, window.innerHeight)
       );
     };
 
@@ -149,28 +157,28 @@ export function BeamsBackground({
   return (
     <div
       className={cn(
-        "relative min-h-screen w-full overflow-hidden bg-black",
+        "relative min-h-screen w-full overflow-hidden bg-[#0a0a0a]",
         className
       )}
     >
       <canvas
         ref={canvasRef}
-        className="absolute inset-0 will-change-transform"
-        style={{ filter: "blur(15px)" }}
+        className="absolute inset-0"
+        style={{ filter: "blur(30px)", willChange: "transform" }}
       />
 
       <motion.div
-        className="absolute inset-0 bg-black/5"
+        className="absolute inset-0"
         animate={{
-          opacity: [0.05, 0.15, 0.05],
+          opacity: [0.02, 0.08, 0.02],
         }}
         transition={{
-          duration: 10,
+          duration: 12,
           ease: "easeInOut",
           repeat: Number.POSITIVE_INFINITY,
         }}
         style={{
-          backdropFilter: "blur(50px)",
+          background: "radial-gradient(ellipse at 50% 30%, rgba(232, 80, 2, 0.06) 0%, transparent 70%)",
         }}
       />
 

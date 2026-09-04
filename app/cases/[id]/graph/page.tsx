@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { getInvestigationGraph } from '@/lib/api';
@@ -9,8 +9,10 @@ import InvestigationCanvas from '@/components/graph/InvestigationCanvas';
 import EntityDetailsDrawer from '@/components/graph/EntityDetailsDrawer';
 import RelationshipDetailsDrawer from '@/components/graph/RelationshipDetailsDrawer';
 import {
-  ShareNetwork,
-  ArrowLeft
+  ArrowLeft,
+  CheckSquareOffset,
+  Square,
+  ArrowsClockwise
 } from '@phosphor-icons/react';
 
 export default function InvestigationGraphPage() {
@@ -20,10 +22,17 @@ export default function InvestigationGraphPage() {
   const [graphData, setGraphData] = useState<GraphData>({ nodes: [], edges: [] });
   const [selectedNode, setSelectedNode] = useState<GraphNode | null>(null);
   const [selectedEdge, setSelectedEdge] = useState<GraphEdge | null>(null);
+  
+  // Entity Selection State
+  const [enabledNodes, setEnabledNodes] = useState<Set<string>>(new Set());
+  const [reconstructKey, setReconstructKey] = useState(0);
 
   useEffect(() => {
     if (caseId) {
-      setGraphData(getInvestigationGraph(caseId));
+      const data = getInvestigationGraph(caseId);
+      setGraphData(data);
+      // Initially start with all nodes enabled (or could start empty based on user pref)
+      setEnabledNodes(new Set(data.nodes.map(n => n.id)));
     }
   }, [caseId]);
 
@@ -37,17 +46,60 @@ export default function InvestigationGraphPage() {
     setSelectedNode(null);
   };
 
+  const toggleNode = (nodeId: string) => {
+    setEnabledNodes(prev => {
+      const next = new Set(prev);
+      if (next.has(nodeId)) {
+        next.delete(nodeId);
+      } else {
+        next.add(nodeId);
+      }
+      return next;
+    });
+  };
+
+  const toggleAll = (enable: boolean) => {
+    if (enable) {
+      setEnabledNodes(new Set(graphData.nodes.map(n => n.id)));
+    } else {
+      setEnabledNodes(new Set());
+    }
+  };
+
+  const reconstructGraph = () => {
+    // Incrementing key forces the canvas to remount, thus resetting physics and layout
+    setReconstructKey(k => k + 1);
+  };
+
+  // Filter the graph data based on enabled nodes
+  const activeGraphData = useMemo(() => {
+    const nodes = graphData.nodes.filter(n => enabledNodes.has(n.id));
+    // Edges are only active if BOTH source and target are enabled
+    const edges = graphData.edges.filter(e => enabledNodes.has(e.source) && enabledNodes.has(e.target));
+    return { nodes, edges };
+  }, [graphData, enabledNodes]);
+
   const legendItems = [
     { label: 'IDENTITY', color: '#E85002', desc: 'Consolidated Identity' },
     { label: 'PERSON', color: '#F9F9F9', desc: 'Human Subject' },
     { label: 'ORGANIZATION', color: '#3B82F6', desc: 'Company / Institution' },
-    { label: 'DEVICE / ID', color: '#06B6D4', desc: 'Hardware IMEI / SIM' },
+    { label: 'DEVICE', color: '#06B6D4', desc: 'Hardware IMEI / SIM' },
     { label: 'IP ADDRESS', color: '#F59E0B', desc: 'Network Gateway / VPN' },
     { label: 'TRANSACTION', color: '#8B5CF6', desc: 'Financial Settlement' },
-    { label: 'WALLET', color: '#D946EF', desc: 'Crypto Address' },
+    { label: 'MAIL/WALLET', color: '#D946EF', desc: 'Email / Crypto Address' },
     { label: 'ACCOUNT', color: '#10B981', desc: 'Bank Card / Account' },
     { label: 'LOCATION', color: '#64748B', desc: 'Terminal Place' }
   ];
+
+  // Group nodes by category for the sidebar
+  const groupedNodes = useMemo(() => {
+    const groups: Record<string, GraphNode[]> = {};
+    graphData.nodes.forEach(n => {
+      if (!groups[n.type]) groups[n.type] = [];
+      groups[n.type].push(n);
+    });
+    return groups;
+  }, [graphData]);
 
   return (
     <div className="space-y-4">
@@ -58,17 +110,17 @@ export default function InvestigationGraphPage() {
             <span>INVESTIGATION STAGE 06 // FORENSIC KNOWLEDGE GRAPH</span>
           </div>
           <h2 className="text-xl sm:text-2xl font-extrabold tracking-tight text-[#000000] dark:text-[#F9F9F9] mt-1">
-            Network Mapping &amp; Link Analysis Topology
+            Network Mapping &amp; Link Analysis
           </h2>
           <p className="text-xs text-[#646464] dark:text-[#A7A7A7]">
-            Interactive canvas with physics force layout, cross-device entity correlation, and node inspection.
+            Interactive topology. Use the builder pane to construct the graph manually.
           </p>
         </div>
 
         <div className="flex items-center gap-3">
           <Link
             href={`/cases/${caseId}`}
-            className="flex items-center gap-2 rounded-2xl bg-[#F0F0F0] hover:bg-[#E2E2E2] dark:bg-[#1C1C1C] dark:hover:bg-[#2A2A2A] border border-[#E2E2E2] dark:border-[#333333] text-[#000000] dark:text-[#F9F9F9] px-4 py-2 text-xs font-bold font-mono transition-colors"
+            className="flex items-center gap-2 rounded-2xl bg-[#000000] hover:bg-[#222222] border border-[#333333] text-[#F9F9F9] px-4 py-2 text-xs font-bold font-mono transition-colors"
           >
             <ArrowLeft size={14} weight="bold" />
             <span>Case Overview</span>
@@ -76,30 +128,103 @@ export default function InvestigationGraphPage() {
         </div>
       </div>
 
-      {/* Main Interactive Canvas Container */}
-      <div className="relative">
-        <InvestigationCanvas
-          data={graphData}
-          onSelectNode={handleSelectNode}
-          onSelectEdge={handleSelectEdge}
-        />
+      <div className="flex flex-col lg:flex-row gap-4 h-[680px]">
+        {/* Graph Builder Pane (Left Side) */}
+        <div className="w-full lg:w-80 flex-shrink-0 flex flex-col bg-[#000000] border border-[#333333] rounded-3xl overflow-hidden shadow-2xl">
+          <div className="p-4 border-b border-[#333333] bg-[#111111] flex flex-col gap-3">
+            <h3 className="text-[12px] font-mono font-bold text-[#F9F9F9] uppercase tracking-widest">
+              Entity Builder
+            </h3>
+            
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => toggleAll(true)}
+                className="flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg bg-[#222222] hover:bg-[#333333] border border-[#333333] text-[#F9F9F9] text-[10px] font-bold font-mono uppercase transition-colors"
+              >
+                <CheckSquareOffset size={14} /> All
+              </button>
+              <button
+                onClick={() => toggleAll(false)}
+                className="flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg bg-[#222222] hover:bg-[#333333] border border-[#333333] text-[#F9F9F9] text-[10px] font-bold font-mono uppercase transition-colors"
+              >
+                <Square size={14} /> None
+              </button>
+              <button
+                onClick={reconstructGraph}
+                className="flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg bg-[#E85002]/20 hover:bg-[#E85002]/30 border border-[#E85002]/50 text-[#E85002] text-[10px] font-bold font-mono uppercase transition-colors"
+                title="Reset layout physics"
+              >
+                <ArrowsClockwise size={14} /> Reset
+              </button>
+            </div>
+          </div>
 
-        {/* Slide-over Inspection Drawers */}
-        <EntityDetailsDrawer
-          node={selectedNode}
-          onClose={() => setSelectedNode(null)}
-        />
+          <div className="flex-1 overflow-y-auto p-4 space-y-6 scrollbar-thin scrollbar-thumb-[#333333]">
+            {Object.entries(groupedNodes).map(([type, nodes]) => (
+              <div key={type}>
+                <h4 className="text-[10px] font-mono font-bold text-[#E85002] uppercase tracking-widest mb-2 px-1">
+                  {type} ({nodes.length})
+                </h4>
+                <div className="space-y-1">
+                  {nodes.map(node => {
+                    const isChecked = enabledNodes.has(node.id);
+                    return (
+                      <label
+                        key={node.id}
+                        className="flex items-start gap-2 p-2 rounded-xl hover:bg-[#111111] border border-transparent hover:border-[#333333] cursor-pointer transition-colors group"
+                      >
+                        <div className="mt-0.5">
+                          {isChecked ? (
+                            <CheckSquareOffset size={16} weight="fill" className="text-[#E85002]" />
+                          ) : (
+                            <Square size={16} className="text-[#646464] group-hover:text-[#A7A7A7]" />
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className={`text-[12px] font-bold truncate transition-colors ${isChecked ? 'text-[#F9F9F9]' : 'text-[#646464] group-hover:text-[#A7A7A7]'}`}>
+                            {node.label}
+                          </p>
+                          <p className="text-[10px] font-mono text-[#646464] truncate">
+                            {node.id}
+                          </p>
+                        </div>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
 
-        <RelationshipDetailsDrawer
-          edge={selectedEdge}
-          onClose={() => setSelectedEdge(null)}
-        />
+        {/* Main Interactive Canvas Container */}
+        <div className="relative flex-1 rounded-3xl overflow-hidden border border-[#333333] bg-[#000000]">
+          <InvestigationCanvas
+            key={reconstructKey} // Force remount on rebuild
+            data={activeGraphData}
+            onSelectNode={handleSelectNode}
+            onSelectEdge={handleSelectEdge}
+            selectedNodeId={selectedNode?.id}
+            selectedEdgeId={selectedEdge?.id}
+          />
+
+          {/* Slide-over Inspection Drawers */}
+          <EntityDetailsDrawer
+            node={selectedNode}
+            onClose={() => setSelectedNode(null)}
+          />
+
+          <RelationshipDetailsDrawer
+            edge={selectedEdge}
+            onClose={() => setSelectedEdge(null)}
+          />
+        </div>
       </div>
 
       {/* Legend & Multi-Modal Type Bar */}
-      <div className="rounded-3xl border border-[#E2E2E2] bg-white dark:border-[#333333] dark:bg-[#121212] p-4 shadow-xs">
+      <div className="rounded-3xl border bg-[#000000] border-[#333333] p-4 shadow-xs">
         <div className="flex flex-wrap items-center justify-between gap-3 text-xs font-mono">
-          <span className="font-bold text-[#646464] dark:text-[#A7A7A7] text-[10px] uppercase">
+          <span className="font-bold text-[#A7A7A7] text-[10px] uppercase">
             Ontology Legend:
           </span>
 
@@ -110,7 +235,7 @@ export default function InvestigationGraphPage() {
                   className="h-3 w-3 rounded-full border border-black/20"
                   style={{ backgroundColor: item.color }}
                 />
-                <span className="text-[11px] font-bold text-[#000000] dark:text-[#F9F9F9]">
+                <span className="text-[11px] font-bold text-[#F9F9F9]">
                   {item.label}
                 </span>
               </div>

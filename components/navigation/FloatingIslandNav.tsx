@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import ThemeToggle from '@/components/theme/ThemeToggle';
 import {
   Target,
   Briefcase,
@@ -16,7 +15,6 @@ import {
   ShareNetwork,
   List,
   X,
-  UserCircle,
   House,
   CaretRight,
 } from '@phosphor-icons/react';
@@ -72,98 +70,56 @@ export default function FloatingIslandNav() {
     { href: `/cases/${currentCaseId}/jobs`,           label: 'Analysis',     icon: Cpu         },
     { href: `/cases/${currentCaseId}/extractions`,    label: 'Findings',     icon: MagnifyingGlass },
     { href: `/cases/${currentCaseId}/quality-review`, label: 'Verify',       icon: ShieldCheck },
-    { href: `/cases/${currentCaseId}/resolution`,     label: 'Match',        icon: Fingerprint },
+    { href: `/cases/${currentCaseId}/resolution-review`, label: 'Match',        icon: Fingerprint },
     { href: `/cases/${currentCaseId}/graph`,          label: 'Map',          icon: ShareNetwork},
   ];
 
   return (
     <>
       {/* ── Island Navigation ─────────────────────────────────────────── */}
-      <header className="fixed top-0 left-0 right-0 z-50 flex justify-center px-4 pt-3 pointer-events-none">
+      <header className="fixed top-0 left-0 right-0 z-50 flex justify-center px-4 pt-4 pointer-events-none">
         <div
           className={`
-            island-nav pointer-events-auto w-full max-w-[1200px] rounded-2xl border
-            ${scrolled
-              ? 'bg-[#111111]/95 border-[#333333] shadow-lg shadow-black/40 py-2 px-4'
-              : 'bg-[#111111]/85 border-[#333333]/60 shadow-md shadow-black/30 py-2.5 px-5'
-            }
-            backdrop-blur-xl
+            pointer-events-auto flex flex-col w-full max-w-6xl transition-all duration-300
+            ${scrolled ? 'translate-y-0' : 'translate-y-1'}
           `}
         >
-          <div className="flex items-center gap-3">
-
+          {/* Main Island Pill */}
+          <div className={`
+            flex items-center justify-between gap-4 rounded-[2rem] border transition-all duration-500
+            ${scrolled 
+              ? 'bg-[#000000]/70 backdrop-blur-3xl border-[#333333]/80 shadow-[0_16px_32px_-8px_rgba(0,0,0,0.8)] py-2.5 px-4' 
+              : 'bg-[#111111]/90 backdrop-blur-2xl border-[#333333] shadow-[0_8px_24px_-4px_rgba(0,0,0,0.6)] py-3 px-5'
+            }
+          `}>
+            
             {/* ── Brand ─────────────────────────────────────────────── */}
             <Link
               href="/"
-              className="flex items-center gap-2.5 flex-shrink-0 group mr-2"
+              className="flex items-center gap-3 flex-shrink-0 group"
             >
-              {/* New Target Logo */}
-              <div className="relative h-8 w-8 flex-shrink-0">
-                <div className="absolute inset-0 rounded-lg bg-gradient-to-br from-[#E85002] to-[#C10801] shadow-sm group-hover:shadow-[0_0_12px_rgba(232,80,2,0.4)] transition-shadow duration-300" />
-                <Target size={18} weight="bold" className="absolute inset-0 m-auto text-[#F9F9F9]" />
+              <div className="relative h-9 w-9 rounded-full bg-[#111111] border border-[#333333] flex items-center justify-center overflow-hidden flex-shrink-0 group-hover:border-[#E85002]/50 transition-colors">
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(232,80,2,0.2)_0%,transparent_70%)] opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <Target size={18} weight="bold" className="text-[#F9F9F9] group-hover:text-[#E85002] transition-colors relative z-10" />
               </div>
-              <div className="hidden sm:block">
-                <div className="text-sm font-bold tracking-tight text-[#F9F9F9] leading-none">
+              <div className="hidden md:block">
+                <div className="text-[13px] font-black tracking-tight text-[#F9F9F9] leading-none uppercase">
                   ARGUS<span className="text-[#E85002]"> AI</span>
-                </div>
-                <div className="text-[9px] font-medium text-[#A7A7A7] tracking-widest uppercase leading-none mt-0.5">
-                  Investigation Platform
                 </div>
               </div>
             </Link>
 
-            {/* ── Divider ───────────────────────────────────────────── */}
-            <div className="h-6 w-px bg-[#333333] flex-shrink-0" />
-
-            {/* ── Primary Nav ───────────────────────────────────────── */}
-            <nav className="hidden lg:flex items-center gap-0.5 flex-shrink-0">
-              {mainNav.map((item) => {
-                const Icon = item.icon;
-                const active = item.exact
-                  ? isAt(item.href, true) || (item.href === '/' && !isAt('/cases') && !isAt('/ontology'))
-                  : item.matchOn
-                    ? isAt(item.matchOn)
-                    : isAt(item.href) && !(item.skipCaseDetail && currentCaseId);
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={`
-                      relative flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-[13px] font-medium
-                      transition-all duration-150
-                      ${active
-                        ? 'text-[#E85002] bg-[#E85002]/10'
-                        : 'text-[#A7A7A7] hover:text-[#F9F9F9] hover:bg-[#222222]'
-                      }
-                    `}
-                  >
-                    <Icon size={15} weight={active ? 'fill' : 'regular'} />
-                    <span>{item.label}</span>
-                    {active && (
-                      <span className="absolute bottom-0 left-2 right-2 h-0.5 bg-[#E85002] rounded-full" />
-                    )}
-                  </Link>
-                );
-              })}
-            </nav>
-
-            {/* ── Case context breadcrumb + stage steps ──────────── */}
-            {currentCaseId && (
-              <>
-                <div className="hidden xl:block h-6 w-px bg-[#333333] flex-shrink-0" />
-                <div className="hidden xl:flex items-center gap-1 min-w-0 flex-1">
-                  {/* Case breadcrumb */}
-                  <Link
-                    href={`/cases/${currentCaseId}`}
-                    className="flex items-center gap-1 text-[11px] font-semibold text-[#E85002] hover:text-[#F16001] transition-colors flex-shrink-0"
-                  >
-                    <span className="px-1.5 py-0.5 rounded-md bg-[#E85002]/10 font-mono border border-[#E85002]/20">
-                      #{currentCaseId}
-                    </span>
-                  </Link>
-                  <CaretRight size={11} className="text-[#646464] flex-shrink-0" />
-                  {/* Steps */}
-                  <div className="flex items-center gap-0.5 overflow-x-auto no-scrollbar">
+            {/* ── Primary Nav / Case Context ───────────────────────────────────────── */}
+            <div className="hidden lg:flex items-center bg-[#000000] rounded-full p-1 border border-[#333333]">
+              {currentCaseId ? (
+                // Case Context Mode
+                <div className="flex items-center pl-3 pr-1">
+                  <div className="flex items-center gap-2 mr-3">
+                    <span className="text-[10px] font-mono font-bold text-[#646464] uppercase tracking-widest">Case</span>
+                    <span className="text-[11px] font-mono font-bold text-[#E85002]">#{currentCaseId}</span>
+                  </div>
+                  <div className="w-px h-4 bg-[#333333] mr-2" />
+                  <div className="flex items-center gap-1">
                     {caseSteps.map((step) => {
                       const isActive = pathname?.startsWith(step.href);
                       const Icon = step.icon;
@@ -172,134 +128,137 @@ export default function FloatingIslandNav() {
                           key={step.href}
                           href={step.href}
                           className={`
-                            flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-medium
-                            transition-all duration-150 whitespace-nowrap flex-shrink-0
+                            flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold font-mono uppercase tracking-wider
+                            transition-all duration-200
                             ${isActive
-                              ? 'text-[#E85002] bg-[#E85002]/10 border border-[#E85002]/20'
-                              : 'text-[#A7A7A7] hover:text-[#F9F9F9] hover:bg-[#222222]'
+                              ? 'bg-[#111111] text-[#F9F9F9] border border-[#333333] shadow-sm'
+                              : 'text-[#646464] hover:text-[#A7A7A7] border border-transparent hover:bg-[#111111]/50'
                             }
                           `}
                         >
-                          <Icon size={12} weight={isActive ? 'fill' : 'regular'} />
-                          <span>{step.label}</span>
+                          <Icon size={14} weight={isActive ? 'fill' : 'regular'} className={isActive ? 'text-[#E85002]' : ''} />
+                          <span className={!isActive ? 'hidden xl:inline' : ''}>{step.label}</span>
                         </Link>
                       );
                     })}
                   </div>
                 </div>
-              </>
-            )}
-
-            {/* ── Spacer ────────────────────────────────────────────── */}
-            {!currentCaseId && <div className="flex-1" />}
+              ) : (
+                // Standard Mode
+                <nav className="flex items-center gap-1">
+                  {mainNav.map((item) => {
+                    const Icon = item.icon;
+                    const active = item.exact
+                      ? isAt(item.href, true) || (item.href === '/' && !isAt('/cases') && !isAt('/ontology'))
+                      : item.matchOn
+                        ? isAt(item.matchOn)
+                        : isAt(item.href);
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        className={`
+                          flex items-center gap-2 px-4 py-1.5 rounded-full text-[12px] font-bold uppercase tracking-wider
+                          transition-all duration-200
+                          ${active
+                            ? 'bg-[#111111] text-[#F9F9F9] border border-[#333333] shadow-sm'
+                            : 'text-[#646464] hover:text-[#A7A7A7] border border-transparent hover:bg-[#111111]/50'
+                          }
+                        `}
+                      >
+                        <Icon size={14} weight={active ? 'fill' : 'regular'} className={active ? 'text-[#E85002]' : ''} />
+                        <span>{item.label}</span>
+                      </Link>
+                    );
+                  })}
+                </nav>
+              )}
+            </div>
 
             {/* ── Right Controls ────────────────────────────────────── */}
-            <div className="flex items-center gap-2 flex-shrink-0 ml-auto lg:ml-0">
-              {/* Search */}
+            <div className="flex items-center gap-3 flex-shrink-0 ml-auto lg:ml-0">
+              
+              {/* Search Toggle */}
               <button
                 onClick={() => setIsSearchOpen(true)}
-                className="
-                  flex items-center gap-2 pl-3 pr-2.5 py-1.5 rounded-xl
-                  bg-[#222222] hover:bg-[#333333]
-                  border border-[#333333]
-                  text-[#A7A7A7] hover:text-[#F9F9F9]
-                  transition-all duration-150 cursor-pointer group
-                "
+                className="flex items-center justify-center w-9 h-9 rounded-full bg-[#111111] border border-[#333333] text-[#A7A7A7] hover:text-[#F9F9F9] hover:border-[#646464] transition-all cursor-pointer group"
+                aria-label="Search"
               >
-                <MagnifyingGlass size={14} weight="regular" />
-                <span className="hidden md:block text-[12px] text-[#A7A7A7]">Search...</span>
-                <kbd className="hidden md:block text-[9px] px-1.5 py-0.5 rounded-md bg-[#000000] border border-[#646464] font-mono text-[#A7A7A7]">
-                  ⌘K
-                </kbd>
+                <MagnifyingGlass size={16} weight="bold" className="group-hover:scale-110 transition-transform" />
               </button>
 
-              {/* User - Hameed Afsar KM */}
-              <button className="
-                flex items-center gap-1.5 px-2 py-1.5 rounded-xl
-                hover:bg-[#222222]
-                transition-colors duration-150 cursor-pointer
-              ">
-                <div className="h-6 w-6 rounded-full bg-gradient-to-br from-[#E85002] to-[#C10801] flex items-center justify-center flex-shrink-0">
-                  <span className="text-[#F9F9F9] text-[9px] font-bold">HA</span>
+              {/* User Profile */}
+              <button className="flex items-center gap-2 pl-1 pr-3 py-1 rounded-full bg-[#111111] border border-[#333333] hover:border-[#646464] transition-all cursor-pointer group">
+                <div className="h-7 w-7 rounded-full bg-gradient-to-br from-[#E85002] to-[#C10801] flex items-center justify-center flex-shrink-0 group-hover:shadow-[0_0_12px_rgba(232,80,2,0.4)] transition-shadow">
+                  <span className="text-white text-[10px] font-black tracking-tighter">HA</span>
                 </div>
-                <span className="hidden sm:block text-[12px] font-medium text-[#A7A7A7]">
-                  Hameed Afsar KM
+                <span className="hidden sm:block text-[11px] font-bold text-[#A7A7A7] group-hover:text-[#F9F9F9] transition-colors">
+                  Hameed
                 </span>
               </button>
-
-              {/* Theme Toggle (Removed since it's a fixed color scheme now, or we can keep it forcing the UI colors) */}
-              {/* <ThemeToggle /> */}
 
               {/* Mobile menu */}
               <button
                 onClick={() => setIsMobileOpen((p) => !p)}
-                className="
-                  p-1.5 rounded-xl lg:hidden
-                  bg-[#222222] border border-[#333333]
-                  text-[#A7A7A7] hover:text-[#F9F9F9]
-                  transition-colors cursor-pointer
-                "
+                className="w-9 h-9 flex items-center justify-center rounded-full lg:hidden bg-[#111111] border border-[#333333] text-[#A7A7A7] hover:text-[#F9F9F9] transition-colors cursor-pointer"
               >
-                {isMobileOpen ? <X size={16} /> : <List size={16} />}
+                {isMobileOpen ? <X size={16} weight="bold" /> : <List size={16} weight="bold" />}
               </button>
             </div>
           </div>
 
           {/* ── Mobile Drawer ─────────────────────────────────────────── */}
           {isMobileOpen && (
-            <div className="mt-2 pt-3 border-t border-[#333333] lg:hidden animate-slide-in-up">
-              <div className="grid grid-cols-3 gap-2">
-                {[
-                  { href: '/', label: 'Overview', icon: House },
-                  { href: '/cases', label: 'Cases', icon: Briefcase },
-                  { href: '/ontology/entities', label: 'Knowledge', icon: TreeStructure },
-                ].map((item) => {
-                  const Icon = item.icon;
-                  return (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      onClick={() => setIsMobileOpen(false)}
-                      className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-[#222222] border border-[#333333] text-[11px] font-medium text-[#A7A7A7] hover:text-[#E85002] transition-colors"
-                    >
-                      <Icon size={18} weight="regular" className="text-[#E85002]" />
-                      <span>{item.label}</span>
-                    </Link>
-                  );
-                })}
+            <div className="mt-2 lg:hidden animate-slide-in-up">
+              <div className="bg-[#111111]/95 backdrop-blur-2xl rounded-3xl border border-[#333333] shadow-2xl p-4 flex flex-col gap-2">
+                {!currentCaseId ? (
+                  mainNav.map((item) => {
+                    const Icon = item.icon;
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        onClick={() => setIsMobileOpen(false)}
+                        className="flex items-center gap-3 p-3 rounded-2xl bg-[#000000] border border-[#333333] text-[12px] font-bold uppercase tracking-wider text-[#A7A7A7] hover:text-[#F9F9F9] hover:border-[#E85002] transition-colors"
+                      >
+                        <Icon size={18} weight="bold" className="text-[#E85002]" />
+                        <span>{item.label}</span>
+                      </Link>
+                    );
+                  })
+                ) : (
+                  <>
+                    <div className="px-3 py-1 flex items-center gap-2">
+                      <span className="text-[10px] font-mono font-bold text-[#646464] uppercase tracking-widest">Case</span>
+                      <span className="text-[11px] font-mono font-bold text-[#E85002]">#{currentCaseId}</span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 mt-2">
+                      {caseSteps.map((step) => {
+                        const Icon = step.icon;
+                        const isActive = pathname?.startsWith(step.href);
+                        return (
+                          <Link
+                            key={step.href}
+                            href={step.href}
+                            onClick={() => setIsMobileOpen(false)}
+                            className={`
+                              flex flex-col items-center gap-2 p-4 rounded-2xl border
+                              transition-colors
+                              ${isActive
+                                ? 'bg-[#E85002]/10 border-[#E85002]/30 text-[#F9F9F9]'
+                                : 'bg-[#000000] border-[#333333] text-[#646464]'
+                              }
+                            `}
+                          >
+                            <Icon size={20} weight={isActive ? 'fill' : 'regular'} className={isActive ? 'text-[#E85002]' : ''} />
+                            <span className="text-[10px] font-bold uppercase tracking-wider">{step.label}</span>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  </>
+                )}
               </div>
-
-              {currentCaseId && (
-                <div className="mt-3 pt-3 border-t border-[#333333]">
-                  <div className="text-[10px] font-semibold text-[#A7A7A7] uppercase tracking-widest mb-2">
-                    Case #{currentCaseId}
-                  </div>
-                  <div className="grid grid-cols-3 gap-1.5">
-                    {caseSteps.map((step) => {
-                      const Icon = step.icon;
-                      const isActive = pathname?.startsWith(step.href);
-                      return (
-                        <Link
-                          key={step.href}
-                          href={step.href}
-                          onClick={() => setIsMobileOpen(false)}
-                          className={`
-                            flex items-center gap-1.5 p-2.5 rounded-lg text-[11px] font-medium border
-                            transition-colors
-                            ${isActive
-                              ? 'bg-[#E85002] border-[#E85002] text-[#F9F9F9]'
-                              : 'bg-[#222222] border-[#333333] text-[#A7A7A7]'
-                            }
-                          `}
-                        >
-                          <Icon size={13} weight={isActive ? 'fill' : 'regular'} />
-                          <span>{step.label}</span>
-                        </Link>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
             </div>
           )}
         </div>
@@ -308,51 +267,53 @@ export default function FloatingIslandNav() {
       {/* ── Search Modal ──────────────────────────────────────────────────── */}
       {isSearchOpen && (
         <div
-          className="fixed inset-0 z-[60] flex items-start justify-center pt-24 p-4 animate-fade-in"
-          style={{ background: 'rgba(0, 0, 0, 0.7)', backdropFilter: 'blur(8px)' }}
+          className="fixed inset-0 z-[60] flex items-start justify-center pt-32 p-4 animate-fade-in"
+          style={{ background: 'rgba(0, 0, 0, 0.8)', backdropFilter: 'blur(12px)' }}
           onClick={() => setIsSearchOpen(false)}
         >
           <div
-            className="w-full max-w-lg rounded-2xl border bg-[#111111] border-[#333333] shadow-2xl overflow-hidden animate-slide-in-up"
+            className="w-full max-w-2xl rounded-[2rem] border bg-[#111111]/90 backdrop-blur-3xl border-[#333333] shadow-[0_32px_64px_-16px_rgba(0,0,0,1)] overflow-hidden animate-slide-in-up"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center gap-3 px-4 py-3.5 border-b border-[#333333]">
-              <MagnifyingGlass size={16} weight="regular" className="text-[#E85002] flex-shrink-0" />
+            <div className="flex items-center gap-4 px-6 py-5 border-b border-[#333333]">
+              <MagnifyingGlass size={20} weight="bold" className="text-[#E85002] flex-shrink-0" />
               <input
                 ref={searchRef}
                 type="text"
                 placeholder="Search cases, people, devices, accounts..."
-                className="flex-1 bg-transparent text-[14px] text-[#F9F9F9] placeholder-[#A7A7A7] outline-none"
+                className="flex-1 bg-transparent text-[16px] font-medium text-[#F9F9F9] placeholder-[#646464] outline-none"
               />
               <button
                 onClick={() => setIsSearchOpen(false)}
-                className="text-[10px] font-mono px-2 py-1 rounded-lg border border-[#333333] text-[#A7A7A7] hover:text-[#F9F9F9] transition-colors"
+                className="text-[11px] font-mono font-bold uppercase tracking-widest px-3 py-1.5 rounded-lg bg-[#000000] border border-[#333333] text-[#A7A7A7] hover:text-[#F9F9F9] hover:border-[#646464] transition-colors"
               >
                 ESC
               </button>
             </div>
-            <div className="p-3">
-              <div className="text-[10px] font-semibold text-[#646464] uppercase tracking-widest px-2 mb-2">
+            <div className="p-4">
+              <div className="text-[10px] font-mono font-bold text-[#646464] uppercase tracking-widest px-4 mb-3">
                 Quick Jump
               </div>
-              {[
-                { label: 'Case #1001 — Fraud Investigation', sub: 'Hameed Afsar KM · Active', href: '/cases/1001' },
-                { label: 'Case #1001 — Connections Map', sub: '18 subjects linked', href: '/cases/1001/graph' },
-                { label: 'Case #1001 — Possible Matches', sub: '3 candidates awaiting decision', href: '/cases/1001/resolution-review' },
-              ].map((r) => (
-                <Link
-                  key={r.href}
-                  href={r.href}
-                  onClick={() => setIsSearchOpen(false)}
-                  className="flex items-center justify-between px-3 py-2.5 rounded-xl hover:bg-[#222222] group transition-colors"
-                >
-                  <div>
-                    <div className="text-[13px] font-medium text-[#F9F9F9]">{r.label}</div>
-                    <div className="text-[11px] text-[#A7A7A7] mt-0.5">{r.sub}</div>
-                  </div>
-                  <CaretRight size={14} className="text-[#E85002] opacity-0 group-hover:opacity-100 transition-opacity" />
-                </Link>
-              ))}
+              <div className="flex flex-col gap-2">
+                {[
+                  { label: 'Case #1001 — Fraud Investigation', sub: 'Hameed Afsar KM · Active', href: '/cases/1001' },
+                  { label: 'Case #1001 — Connections Map', sub: '18 subjects linked', href: '/cases/1001/graph' },
+                  { label: 'Case #1001 — Possible Matches', sub: '3 candidates awaiting decision', href: '/cases/1001/resolution-review' },
+                ].map((r) => (
+                  <Link
+                    key={r.href}
+                    href={r.href}
+                    onClick={() => setIsSearchOpen(false)}
+                    className="flex items-center justify-between px-4 py-3.5 rounded-2xl hover:bg-[#000000] group transition-all border border-transparent hover:border-[#333333]"
+                  >
+                    <div>
+                      <div className="text-[13px] font-bold text-[#A7A7A7] group-hover:text-[#F9F9F9] transition-colors">{r.label}</div>
+                      <div className="text-[11px] text-[#646464] mt-1 font-mono">{r.sub}</div>
+                    </div>
+                    <CaretRight size={16} weight="bold" className="text-[#646464] group-hover:text-[#E85002] transition-colors" />
+                  </Link>
+                ))}
+              </div>
             </div>
           </div>
         </div>
