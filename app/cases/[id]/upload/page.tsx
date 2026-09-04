@@ -114,17 +114,17 @@ export default function UploadPage() {
   return (
     <div className="space-y-5 animate-fade-up">
       {/* Header */}
-      <div className="bg-white dark:bg-[#161B27] border border-[#E2E6F0] dark:border-[#252D3E] rounded-2xl overflow-hidden shadow-sm">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-6 py-5">
+      <div className="bg-[#111111] border border-[#333333] rounded-[2rem] overflow-hidden shadow-2xl">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-8 py-6">
           <div className="space-y-1.5">
             <div className="flex items-center gap-2">
-              <span className="badge badge-orange font-mono">Intake</span>
-              <span className="badge badge-muted font-mono">Case #{caseId}</span>
+              <span className="px-2.5 py-1 rounded-md text-[11px] font-mono font-bold uppercase tracking-wider bg-[#E85002] text-[#000000]">Intake</span>
+              <span className="text-[11px] font-mono font-bold uppercase tracking-widest text-[#A7A7A7]">Case #{caseId}</span>
             </div>
-            <h1 className="text-xl font-bold text-[#0D0F14] dark:text-[#EEF0F6]">
+            <h1 className="text-2xl font-black text-[#F9F9F9]">
               Evidence Intake &amp; Upload
             </h1>
-            <p className="text-[13px] text-[#8B95AD]">
+            <p className="text-[14px] text-[#A7A7A7]">
               Stage forensic artifacts for ingestion into the evidence vault. Files are validated and SHA-256 fingerprinted before sealing.
             </p>
           </div>
@@ -132,25 +132,25 @@ export default function UploadPage() {
           <div className="flex items-center gap-3 flex-shrink-0">
             <Link
               href={`/cases/${caseId}/evidence`}
-              className="flex items-center gap-1.5 text-[13px] font-semibold text-[#E85002] hover:text-[#F16001] transition-colors"
+              className="flex items-center gap-1.5 text-xs font-bold font-mono uppercase tracking-wider text-[#E85002] hover:text-[#F16001] transition-colors"
             >
               <span>Evidence Custody</span>
-              <ArrowRight size={14} weight="regular" />
+              <ArrowRight size={14} weight="bold" />
             </Link>
           </div>
         </div>
 
         {/* Stats row */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 divide-x divide-[#E2E6F0] dark:divide-[#252D3E] border-t border-[#E2E6F0] dark:border-[#252D3E]">
+        <div className="grid grid-cols-2 sm:grid-cols-4 divide-x divide-[#333333] border-t border-[#333333] bg-[#000000]">
           {[
             { label: 'Files staged', value: `${stagedFiles.length}` },
             { label: 'Total size', value: totalSize > 0 ? `${(totalSize / (1024 * 1024)).toFixed(1)} MB` : '0 MB' },
             { label: 'Valid', value: `${validCount}`, accent: validCount > 0 },
             { label: 'Rejected', value: `${invalidCount}`, danger: invalidCount > 0 },
           ].map((s) => (
-            <div key={s.label} className="px-5 py-3.5">
-              <p className="text-[10px] font-semibold text-[#8B95AD] uppercase tracking-wider">{s.label}</p>
-              <p className={`text-[15px] font-bold mt-0.5 ${s.danger ? 'text-red-500' : s.accent ? 'text-emerald-500' : 'text-[#0D0F14] dark:text-[#EEF0F6]'}`}>{s.value}</p>
+            <div key={s.label} className="px-6 py-4">
+              <p className="text-[11px] font-mono font-semibold text-[#A7A7A7] uppercase tracking-wider">{s.label}</p>
+              <p className={`text-[16px] font-mono font-bold mt-0.5 ${s.danger ? 'text-rose-500' : s.accent ? 'text-[#E85002]' : 'text-[#F9F9F9]'}`}>{s.value}</p>
             </div>
           ))}
         </div>
@@ -161,10 +161,10 @@ export default function UploadPage() {
         onDrop={handleDrop}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
-        className={`relative border-2 border-dashed rounded-3xl p-10 text-center transition-all duration-200 cursor-pointer group ${
+        className={`relative border-2 border-dashed rounded-[2rem] p-10 text-center transition-all duration-200 cursor-pointer group ${
           isDragging
-            ? 'border-[#E85002] bg-[#E85002]/5 dark:bg-[#E85002]/8 shadow-lg shadow-[#E85002]/10'
-            : 'border-[#E2E6F0] dark:border-[#252D3E] bg-white dark:bg-[#161B27] hover:border-[#E85002]/50 hover:bg-[#E85002]/2'
+            ? 'border-[#E85002] bg-[#E85002]/10 shadow-lg shadow-[#E85002]/10'
+            : 'border-[#333333] bg-[#111111] hover:border-[#E85002]/50 hover:bg-[#161616]'
         }`}
       >
         <input
@@ -201,11 +201,11 @@ export default function UploadPage() {
 
       {/* Staged Files Table */}
       {stagedFiles.length > 0 && (
-        <div className="bg-white dark:bg-[#161B27] border border-[#E2E6F0] dark:border-[#252D3E] rounded-2xl overflow-hidden shadow-sm">
-          <div className="flex items-center justify-between px-6 py-4 border-b border-[#E2E6F0] dark:border-[#252D3E]">
-            <div className="flex items-center gap-2">
-              <ListChecks size={18} weight="fill" className="text-[#E85002]" />
-              <h2 className="text-sm font-bold text-[#0D0F14] dark:text-[#EEF0F6]">Staged Artifacts</h2>
+        <div className="bg-[#111111] border border-[#333333] rounded-[2rem] overflow-hidden shadow-2xl">
+          <div className="flex items-center justify-between px-8 py-5 border-b border-[#333333] bg-[#000000]">
+            <div className="flex items-center gap-3">
+              <ListChecks size={20} weight="fill" className="text-[#E85002]" />
+              <h2 className="text-base font-bold text-[#F9F9F9]">Staged Artifacts</h2>
               <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[#E85002]/10 text-[#E85002] border border-[#E85002]/20">
                 {stagedFiles.length}
               </span>
@@ -330,16 +330,16 @@ export default function UploadPage() {
 
       {/* Empty State when no files staged */}
       {stagedFiles.length === 0 && (
-        <div className="bg-white dark:bg-[#161B27] border border-[#E2E6F0] dark:border-[#252D3E] rounded-2xl p-8 text-center">
+        <div className="bg-[#111111] border border-[#333333] rounded-[2rem] p-12 text-center shadow-2xl">
           <div className="max-w-md mx-auto space-y-4">
-            <div className="mx-auto h-14 w-14 rounded-2xl bg-[#F0F0F0] dark:bg-[#000000] flex items-center justify-center border border-[#E2E2E2] dark:border-[#333333]">
-              <ShieldCheck size={28} weight="duotone" className="text-[#8B95AD]" />
+            <div className="mx-auto h-16 w-16 rounded-2xl bg-[#000000] flex items-center justify-center border border-[#333333]">
+              <ShieldCheck size={32} weight="duotone" className="text-[#E85002]" />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-[#0D0F14] dark:text-[#EEF0F6]">No artifacts staged yet</h3>
-              <p className="text-xs text-[#8B95AD] mt-1">Drag files into the zone above or click to browse your filesystem.</p>
+              <h3 className="text-base font-bold text-[#F9F9F9]">No artifacts staged yet</h3>
+              <p className="text-xs text-[#A7A7A7] mt-1.5 leading-relaxed">Drag files into the drop zone above or click to select forensic artifacts.</p>
             </div>
-            <div className="flex flex-wrap items-center justify-center gap-3 text-[10px] font-mono text-[#8B95AD]">
+            <div className="flex flex-wrap items-center justify-center gap-3 text-[11px] font-mono text-[#A7A7A7] pt-2">
               <span className="flex items-center gap-1"><LockKey size={11} weight="fill" className="text-[#E85002]" /> SHA-256 fingerprinted</span>
               <span className="flex items-center gap-1"><ShieldCheck size={11} weight="fill" className="text-[#E85002]" /> Tamper-proof seal</span>
               <span className="flex items-center gap-1"><CheckCircle size={11} weight="fill" className="text-[#E85002]" /> Chain of custody preserved</span>

@@ -65,6 +65,7 @@ export default function CasesPage() {
   [cases, query, cat, sort, dir]);
 
   return (
+    <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
     <div className="space-y-6 animate-fade-up">
 
       {/* Header */}
@@ -183,6 +184,7 @@ export default function CasesPage() {
             <p className="text-[14px] text-[#8B95AD] dark:text-[#646464] mt-2">Try adjusting your search or filters.</p>
           </div>
         )}
+        </div>
       </div>
     </div>
   );

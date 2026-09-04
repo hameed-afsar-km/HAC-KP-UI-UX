@@ -12,6 +12,7 @@ export default function OntologyLayout({ children }: { children: React.ReactNode
   const isRelationships = pathname?.includes('/ontology/relationships');
 
   return (
+    <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
     <div className="space-y-6 animate-fade-up">
 
       {/* Header */}
@@ -69,6 +70,7 @@ export default function OntologyLayout({ children }: { children: React.ReactNode
       </div>
 
       <div>{children}</div>
+    </div>
     </div>
   );
 }

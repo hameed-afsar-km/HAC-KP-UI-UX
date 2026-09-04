@@ -24,7 +24,7 @@ export default function AppLayoutShell({ children }: { children: React.ReactNode
 
       <FloatingIslandNav />
 
-      <main className="flex-1 w-full max-w-[1400px] mx-auto pt-24 sm:pt-28 pb-16 px-4 sm:px-6 lg:px-8 relative z-10">
+      <main className="flex-1 w-full pt-24 sm:pt-28 pb-16 relative z-10">
         {children}
       </main>
 

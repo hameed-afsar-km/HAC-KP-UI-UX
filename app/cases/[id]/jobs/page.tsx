@@ -250,17 +250,17 @@ export default function ExtractionJobsPage() {
   return (
     <div className="space-y-5">
       {/* Page Header */}
-      <div className="bg-white dark:bg-[#161B27] border border-[#E2E6F0] dark:border-[#252D3E] rounded-2xl overflow-hidden shadow-sm animate-fade-up">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 px-6 py-5">
+      <div className="bg-[#111111] border border-[#333333] rounded-[2rem] overflow-hidden shadow-2xl animate-fade-up">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 px-8 py-6">
           <div className="space-y-1.5">
             <div className="flex items-center gap-2">
-              <span className="badge badge-orange font-mono">Step 02</span>
-              <span className="badge badge-muted font-mono">Case #{caseId}</span>
+              <span className="px-2.5 py-1 rounded-md text-[11px] font-mono font-bold uppercase tracking-wider bg-[#E85002] text-[#000000]">Step 02</span>
+              <span className="text-[11px] font-mono font-bold uppercase tracking-widest text-[#A7A7A7]">Case #{caseId}</span>
             </div>
-            <h1 className="text-xl font-bold text-[#0D0F14] dark:text-[#EEF0F6]">
+            <h1 className="text-2xl font-black text-[#F9F9F9]">
               Analysis Jobs
             </h1>
-            <p className="text-[13px] text-[#8B95AD]">
+            <p className="text-[14px] text-[#A7A7A7]">
               ARGUS AI reads your files and pulls out names, devices, accounts and transactions. Track each job’s progress here.
             </p>
           </div>
@@ -270,7 +270,7 @@ export default function ExtractionJobsPage() {
               type="button"
               onClick={() => setIsEligibilityOpen(true)}
               disabled={summaryCounts.requiresExtraction === 0}
-              className="flex items-center gap-2 rounded-xl bg-[#E85002] hover:bg-[#F16001] disabled:opacity-40 text-white px-4 py-2.5 text-[13px] font-semibold transition-all duration-150 shadow-sm hover:shadow-md hover:shadow-[#E85002]/20 active:scale-95 cursor-pointer"
+              className="flex items-center gap-2 rounded-xl bg-[#E85002] hover:bg-[#F16001] disabled:opacity-40 text-white px-5 py-3 text-xs font-bold font-mono uppercase tracking-wider transition-all duration-150 shadow-lg shadow-[#E85002]/20 active:scale-95 cursor-pointer"
             >
               <Play size={16} weight="fill" />
               <span>Run Analysis</span>
@@ -278,16 +278,16 @@ export default function ExtractionJobsPage() {
 
             <Link
               href={`/cases/${caseId}/extractions`}
-              className="flex items-center gap-1.5 rounded-xl bg-[#F1F3F9] hover:bg-[#E2E6F0] dark:bg-[#1E2435] dark:hover:bg-[#252D3E] text-[#0D0F14] dark:text-[#EEF0F6] border border-[#E2E6F0] dark:border-[#252D3E] px-4 py-2.5 text-[13px] font-semibold transition-all duration-150"
+              className="flex items-center gap-1.5 rounded-xl bg-[#000000] hover:bg-[#222222] text-[#F9F9F9] border border-[#333333] px-5 py-3 text-xs font-bold font-mono uppercase tracking-wider transition-all duration-150"
             >
               <span>View Findings</span>
-              <ArrowRight size={14} weight="regular" />
+              <ArrowRight size={14} weight="bold" />
             </Link>
           </div>
         </div>
 
         {/* Metric row */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 divide-x divide-y lg:divide-y-0 divide-[#E2E6F0] dark:divide-[#252D3E] border-t border-[#E2E6F0] dark:border-[#252D3E]">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 divide-x divide-y lg:divide-y-0 divide-[#333333] border-t border-[#333333] bg-[#000000]">
           {[
             { label: 'Total files',       value: summaryCounts.totalFiles,           dim: false },
             { label: 'Eligible to run',   value: `${summaryCounts.eligibleFiles}`,   accent: true },
@@ -296,10 +296,10 @@ export default function ExtractionJobsPage() {
             { label: 'Failed',            value: `${summaryCounts.failedJobs}`,      red: true },
             { label: 'Incremental',       value: 'Active',                            accent: true },
           ].map((m) => (
-            <div key={m.label} className="px-4 py-3">
-              <p className="text-[10px] font-semibold text-[#8B95AD] uppercase tracking-wider">{m.label}</p>
-              <p className={`text-[15px] font-bold mt-0.5 tabular-nums ${
-                m.red ? 'text-rose-500' : m.accent ? 'text-[#E85002]' : 'text-[#0D0F14] dark:text-[#EEF0F6]'
+            <div key={m.label} className="px-5 py-3.5">
+              <p className="text-[11px] font-mono font-semibold text-[#A7A7A7] uppercase tracking-wider">{m.label}</p>
+              <p className={`text-[16px] font-mono font-bold mt-0.5 tabular-nums ${
+                m.red ? 'text-rose-500' : m.accent ? 'text-[#E85002]' : 'text-[#F9F9F9]'
               }`}>{m.value}</p>
             </div>
           ))}
@@ -307,7 +307,7 @@ export default function ExtractionJobsPage() {
       </div>
 
       {/* Filter Bar */}
-      <div className="bg-white dark:bg-[#161B27] border border-[#E2E6F0] dark:border-[#252D3E] rounded-2xl p-4 shadow-sm flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between">
+      <div className="bg-[#111111] border border-[#333333] rounded-[1.5rem] p-4 shadow-xl flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between">
         {/* Search */}
         <div className="relative flex-1 max-w-md">
           <MagnifyingGlass
@@ -365,7 +365,7 @@ export default function ExtractionJobsPage() {
       </div>
 
       {/* 3.4 Jobs Execution Table */}
-      <div className="rounded-3xl border border-[#E2E2E2] bg-white dark:border-[#333333] dark:bg-[#121212] overflow-hidden shadow-xs">
+      <div className="rounded-[2rem] border border-[#333333] bg-[#111111] overflow-hidden shadow-2xl">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead className="border-b border-[#E2E2E2] bg-[#F0F0F0] dark:border-[#333333] dark:bg-[#000000] font-mono text-[#000000] dark:text-[#F9F9F9]">

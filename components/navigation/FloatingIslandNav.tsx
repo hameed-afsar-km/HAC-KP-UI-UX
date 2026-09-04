@@ -69,12 +69,13 @@ export default function FloatingIslandNav() {
   ];
 
   const caseSteps = [
-    { href: `/cases/${currentCaseId}/evidence`, label: 'Files', icon: Files },
-    { href: `/cases/${currentCaseId}/jobs`, label: 'Analysis', icon: Cpu },
-    { href: `/cases/${currentCaseId}/extractions`, label: 'Findings', icon: MagnifyingGlass },
-    { href: `/cases/${currentCaseId}/quality-review`, label: 'Verify', icon: ShieldCheck },
-    { href: `/cases/${currentCaseId}/resolution-review`, label: 'Match', icon: Fingerprint },
-    { href: `/cases/${currentCaseId}/graph`, label: 'Map', icon: ShareNetwork },
+    { href: `/cases/${currentCaseId}`,                   label: 'Overview',  icon: Briefcase,       exact: true  },
+    { href: `/cases/${currentCaseId}/evidence`,          label: 'Files',     icon: Files,           exact: false },
+    { href: `/cases/${currentCaseId}/jobs`,              label: 'Analysis',  icon: Cpu,             exact: false },
+    { href: `/cases/${currentCaseId}/extractions`,       label: 'Findings',  icon: MagnifyingGlass, exact: false },
+    { href: `/cases/${currentCaseId}/quality-review`,    label: 'Verify',    icon: ShieldCheck,     exact: false },
+    { href: `/cases/${currentCaseId}/resolution-review`, label: 'Match',     icon: Fingerprint,     exact: false },
+    { href: `/cases/${currentCaseId}/graph`,             label: 'Map',       icon: ShareNetwork,    exact: false },
   ];
 
   const isDark = theme === 'dark';
@@ -129,7 +130,9 @@ export default function FloatingIslandNav() {
                   <div className={`w-px h-4 mr-2 ${isDark ? 'bg-[#333333]' : 'bg-[#E2E6F0]'}`} />
                   <div className="flex items-center gap-1">
                     {caseSteps.map((step) => {
-                      const isActive = pathname?.startsWith(step.href);
+                      const isActive = step.exact
+                        ? pathname === step.href
+                        : pathname?.startsWith(step.href);
                       const Icon = step.icon;
                       return (
                         <Link
@@ -139,16 +142,14 @@ export default function FloatingIslandNav() {
                             flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold font-mono uppercase tracking-wider
                             transition-all duration-200
                             ${isActive
-                              ? isDark
-                                ? 'bg-[#111111] text-[#F9F9F9] border border-[#333333] shadow-sm'
-                                : 'bg-white text-[#0D0F14] border border-[#E2E6F0] shadow-sm'
+                              ? 'bg-[#E85002] text-[#000000] shadow-[0_0_12px_rgba(232,80,2,0.4)]'
                               : isDark
                                 ? 'text-[#646464] hover:text-[#A7A7A7] border border-transparent hover:bg-[#111111]/50'
                                 : 'text-[#8B95AD] hover:text-[#0D0F14] border border-transparent hover:bg-[#E2E6F0]/50'
                             }
                           `}
                         >
-                          <Icon size={14} weight={isActive ? 'fill' : 'regular'} className={isActive ? 'text-[#E85002]' : ''} />
+                          <Icon size={14} weight={isActive ? 'fill' : 'regular'} />
                           <span className={!isActive ? 'hidden xl:inline' : ''}>{step.label}</span>
                         </Link>
                       );
@@ -259,7 +260,9 @@ export default function FloatingIslandNav() {
                     <div className="grid grid-cols-2 gap-2 mt-2">
                       {caseSteps.map((step) => {
                         const Icon = step.icon;
-                        const isActive = pathname?.startsWith(step.href);
+                        const isActive = step.exact
+                          ? pathname === step.href
+                          : pathname?.startsWith(step.href);
                         return (
                           <Link
                             key={step.href}
@@ -268,14 +271,14 @@ export default function FloatingIslandNav() {
                             className={`
                               flex flex-col items-center gap-2 p-4 rounded-2xl border transition-colors
                               ${isActive
-                                ? 'bg-[#E85002]/10 border-[#E85002]/30 text-[#F9F9F9]'
+                                ? 'bg-[#E85002] border-[#E85002] text-[#000000]'
                                 : isDark
                                   ? 'bg-[#000000] border-[#333333] text-[#646464]'
                                   : 'bg-[#F6F7FB] border-[#E2E6F0] text-[#8B95AD]'
                               }
                             `}
                           >
-                            <Icon size={20} weight={isActive ? 'fill' : 'regular'} className={isActive ? 'text-[#E85002]' : ''} />
+                            <Icon size={20} weight={isActive ? 'fill' : 'regular'} />
                             <span className="text-[10px] font-bold uppercase tracking-wider">{step.label}</span>
                           </Link>
                         );

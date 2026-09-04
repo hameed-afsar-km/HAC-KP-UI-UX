@@ -109,17 +109,17 @@ export default function EvidencePage() {
   return (
     <div className="space-y-5 animate-fade-up">
       {/* Page Header */}
-      <div className="bg-white dark:bg-[#161B27] border border-[#E2E6F0] dark:border-[#252D3E] rounded-2xl overflow-hidden shadow-sm">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-6 py-5">
+      <div className="bg-[#111111] border border-[#333333] rounded-[2rem] overflow-hidden shadow-2xl">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-8 py-6">
           <div className="space-y-1.5">
             <div className="flex items-center gap-2">
-              <span className="badge badge-orange font-mono">Step 01</span>
-              <span className="badge badge-muted font-mono">Case #{caseId}</span>
+              <span className="px-2.5 py-1 rounded-md text-[11px] font-mono font-bold uppercase tracking-wider bg-[#E85002] text-[#000000]">Step 01</span>
+              <span className="text-[11px] font-mono font-bold uppercase tracking-widest text-[#A7A7A7]">Case #{caseId}</span>
             </div>
-            <h1 className="text-xl font-bold text-[#0D0F14] dark:text-[#EEF0F6]">
+            <h1 className="text-2xl font-black text-[#F9F9F9]">
               Case Files &amp; Documents
             </h1>
-            <p className="text-[13px] text-[#8B95AD]">
+            <p className="text-[14px] text-[#A7A7A7]">
               All evidence files for this case. Each file is locked and tamper-proof once uploaded.
             </p>
           </div>
@@ -127,40 +127,40 @@ export default function EvidencePage() {
           <div className="flex items-center gap-3 flex-shrink-0">
             <button
               onClick={() => setIsUploadModalOpen(true)}
-              className="flex items-center gap-2 rounded-xl bg-[#E85002] hover:bg-[#F16001] text-white px-4 py-2.5 text-[13px] font-semibold transition-all duration-150 shadow-sm hover:shadow-md hover:shadow-[#E85002]/20 active:scale-95 cursor-pointer"
+              className="flex items-center gap-2 rounded-xl bg-[#E85002] hover:bg-[#F16001] text-white px-5 py-3 text-xs font-bold font-mono uppercase tracking-wider transition-all duration-150 shadow-lg shadow-[#E85002]/20 active:scale-95 cursor-pointer"
             >
-              <CloudArrowUp size={16} weight="regular" />
+              <CloudArrowUp size={16} weight="bold" />
               <span>Add File</span>
             </button>
 
             <Link
               href={`/cases/${caseId}/jobs`}
-              className="flex items-center gap-1.5 text-[13px] font-semibold text-[#E85002] hover:text-[#F16001] transition-colors"
+              className="flex items-center gap-1.5 text-xs font-bold font-mono uppercase tracking-wider text-[#E85002] hover:text-[#F16001] transition-colors"
             >
               <span>Run Analysis</span>
-              <ArrowRight size={14} weight="regular" />
+              <ArrowRight size={14} weight="bold" />
             </Link>
           </div>
         </div>
 
         {/* Stats row */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 divide-x divide-[#E2E6F0] dark:divide-[#252D3E] border-t border-[#E2E6F0] dark:border-[#252D3E]">
+        <div className="grid grid-cols-2 sm:grid-cols-4 divide-x divide-[#333333] border-t border-[#333333] bg-[#000000]">
           {[
             { label: 'Files uploaded', value: `${files.length}` },
             { label: 'Tamper protection', value: 'SHA-256', accent: true },
             { label: 'Files analysed', value: '3' },
             { label: 'Storage', value: 'Encrypted' },
           ].map((s) => (
-            <div key={s.label} className="px-5 py-3.5">
-              <p className="text-[10px] font-semibold text-[#8B95AD] uppercase tracking-wider">{s.label}</p>
-              <p className={`text-[15px] font-bold mt-0.5 ${s.accent ? 'text-[#E85002]' : 'text-[#0D0F14] dark:text-[#EEF0F6]'}`}>{s.value}</p>
+            <div key={s.label} className="px-6 py-4">
+              <p className="text-[11px] font-mono font-semibold text-[#A7A7A7] uppercase tracking-wider">{s.label}</p>
+              <p className={`text-[16px] font-mono font-bold mt-0.5 ${s.accent ? 'text-[#E85002]' : 'text-[#F9F9F9]'}`}>{s.value}</p>
             </div>
           ))}
         </div>
       </div>
 
       {/* Evidence Table */}
-      <div className="bg-white dark:bg-[#161B27] border border-[#E2E6F0] dark:border-[#252D3E] rounded-2xl overflow-hidden shadow-sm">
+      <div className="bg-[#111111] border border-[#333333] rounded-[2rem] overflow-hidden shadow-2xl">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead className="border-b border-[#E2E2E2] bg-[#F0F0F0] dark:border-[#333333] dark:bg-[#000000] font-mono text-[#000000] dark:text-[#F9F9F9]">

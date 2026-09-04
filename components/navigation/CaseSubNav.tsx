@@ -33,8 +33,8 @@ export default function CaseSubNav({ caseId }: { caseId: string | number }) {
     item.exact ? pathname === item.href : pathname.startsWith(item.href);
 
   return (
-    <div className="w-full overflow-x-auto no-scrollbar">
-      <div className="flex items-stretch bg-white dark:bg-[#161B27] border border-[#E2E6F0] dark:border-[#252D3E] rounded-2xl overflow-hidden shadow-sm min-w-max">
+    <div className="w-full overflow-x-auto no-scrollbar py-4">
+      <div className="flex items-stretch bg-[#111111] border border-[#333333] rounded-[1.5rem] overflow-hidden shadow-2xl min-w-max">
         {items.map((item, idx) => {
           const active = isActive(item);
           const Icon = item.icon;
@@ -43,36 +43,29 @@ export default function CaseSubNav({ caseId }: { caseId: string | number }) {
               <Link
                 href={item.href}
                 className={`
-                  relative flex items-center gap-2 px-4 py-3 text-[12px] font-medium
-                  transition-all duration-150 whitespace-nowrap group
+                  relative flex items-center gap-2.5 px-6 py-4 text-[13px] font-bold font-mono uppercase tracking-widest
+                  transition-all duration-300 whitespace-nowrap group
                   ${active
-                    ? 'text-[#E85002] bg-[#E85002]/5 dark:bg-[#E85002]/8'
-                    : 'text-[#5A6480] dark:text-[#8B95AD] hover:text-[#0D0F14] dark:hover:text-[#EEF0F6] hover:bg-[#F1F3F9] dark:hover:bg-[#1E2435]'
+                    ? 'text-[#000000] bg-[#E85002] shadow-[inset_0_0_20px_rgba(255,255,255,0.2)]'
+                    : 'text-[#646464] hover:text-[#F9F9F9] hover:bg-[#222222]'
                   }
                 `}
               >
                 <span className={`
-                  w-5 h-5 rounded-md flex items-center justify-center text-[10px] font-bold flex-shrink-0
-                  transition-colors duration-150
+                  w-6 h-6 rounded-md flex items-center justify-center text-[11px] font-black flex-shrink-0
+                  transition-colors duration-300
                   ${active
-                    ? 'bg-[#E85002] text-white'
-                    : 'bg-[#F1F3F9] dark:bg-[#1E2435] text-[#8B95AD] group-hover:bg-[#E85002]/10 group-hover:text-[#E85002]'
+                    ? 'bg-[#000000] text-[#E85002]'
+                    : 'bg-[#222222] text-[#A7A7A7] group-hover:bg-[#333333] group-hover:text-[#F9F9F9]'
                   }
                 `}>
                   {item.step}
                 </span>
-                <Icon size={14} weight={active ? 'fill' : 'regular'} />
+                <Icon size={16} weight={active ? 'bold' : 'regular'} className={active ? 'text-[#000000]' : ''} />
                 <span>{item.label}</span>
-
-                {/* Sliding bottom indicator */}
-                <span className={`
-                  absolute bottom-0 left-3 right-3 h-0.5 rounded-full bg-[#E85002]
-                  transition-all duration-200
-                  ${active ? 'opacity-100 scale-x-100' : 'opacity-0 scale-x-0'}
-                `} />
               </Link>
               {idx < items.length - 1 && (
-                <div className="w-px self-stretch bg-[#E2E6F0] dark:bg-[#252D3E] flex-shrink-0" />
+                <div className="w-px self-stretch bg-[#333333] flex-shrink-0" />
               )}
             </React.Fragment>
           );
