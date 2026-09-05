@@ -34,7 +34,7 @@ export default function CaseSubNav({ caseId }: { caseId: string | number }) {
 
   return (
     <div className="w-full overflow-x-auto no-scrollbar py-4">
-      <div className="flex items-stretch bg-[#111111] border border-[#333333] rounded-[1.5rem] overflow-hidden shadow-2xl min-w-max">
+      <div className="flex items-stretch bg-white dark:bg-[#111111] border border-[#E2E6F0] dark:border-[#333333] rounded-[1.5rem] overflow-hidden shadow-sm dark:shadow-2xl min-w-max">
         {items.map((item, idx) => {
           const active = isActive(item);
           const Icon = item.icon;
@@ -47,7 +47,7 @@ export default function CaseSubNav({ caseId }: { caseId: string | number }) {
                   transition-all duration-300 whitespace-nowrap group
                   ${active
                     ? 'text-[#000000] bg-[#E85002] shadow-[inset_0_0_20px_rgba(255,255,255,0.2)]'
-                    : 'text-[#646464] hover:text-[#F9F9F9] hover:bg-[#222222]'
+                    : 'text-[#8B95AD] hover:text-[#0D0F14] hover:bg-[#F6F7FB] dark:text-[#646464] dark:hover:text-[#F9F9F9] dark:hover:bg-[#222222]'
                   }
                 `}
               >
@@ -56,7 +56,7 @@ export default function CaseSubNav({ caseId }: { caseId: string | number }) {
                   transition-colors duration-300
                   ${active
                     ? 'bg-[#000000] text-[#E85002]'
-                    : 'bg-[#222222] text-[#A7A7A7] group-hover:bg-[#333333] group-hover:text-[#F9F9F9]'
+                    : 'bg-[#F0F0F0] text-[#8B95AD] group-hover:bg-[#E2E6F0] group-hover:text-[#0D0F14] dark:bg-[#222222] dark:text-[#A7A7A7] dark:group-hover:bg-[#333333] dark:group-hover:text-[#F9F9F9]'
                   }
                 `}>
                   {item.step}
@@ -65,7 +65,7 @@ export default function CaseSubNav({ caseId }: { caseId: string | number }) {
                 <span>{item.label}</span>
               </Link>
               {idx < items.length - 1 && (
-                <div className="w-px self-stretch bg-[#333333] flex-shrink-0" />
+                <div className="w-px self-stretch bg-[#E2E6F0] dark:bg-[#333333] flex-shrink-0" />
               )}
             </React.Fragment>
           );

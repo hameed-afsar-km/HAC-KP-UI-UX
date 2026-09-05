@@ -3,10 +3,12 @@
 import React from 'react';
 import FloatingIslandNav from './FloatingIslandNav';
 import HelpModal from '../help/HelpModal';
+import { BeamsBackground } from '../ui/beams-background';
 
 export default function AppLayoutShell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen flex flex-col bg-[#F9F9F9] dark:bg-[#000000] text-[#000000] dark:text-[#F9F9F9] transition-colors duration-200 selection:bg-[#E85002] selection:text-white">
+    <BeamsBackground intensity="subtle">
+    <div className="min-h-screen flex flex-col text-[#000000] dark:text-[#F9F9F9] transition-colors duration-200 selection:bg-[#E85002] selection:text-white">
 
       {/* Very subtle background texture */}
       <div
@@ -47,5 +49,6 @@ export default function AppLayoutShell({ children }: { children: React.ReactNode
       </footer>
       <HelpModal />
     </div>
+    </BeamsBackground>
   );
 }

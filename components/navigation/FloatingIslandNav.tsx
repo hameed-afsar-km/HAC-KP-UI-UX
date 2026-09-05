@@ -65,7 +65,7 @@ export default function FloatingIslandNav() {
   const mainNav = [
     { href: '/', label: 'Overview', icon: House, exact: true },
     { href: '/cases', label: 'Cases', icon: Briefcase, exact: false, skipCaseDetail: true },
-    { href: '/ontology/entities', label: 'Knowledge', icon: TreeStructure, exact: false, matchOn: '/ontology' },
+    { href: '/ontology/entities', label: 'Ontology', icon: TreeStructure, exact: false, matchOn: '/ontology' },
   ];
 
   const caseSteps = [
@@ -83,52 +83,53 @@ export default function FloatingIslandNav() {
   return (
     <>
       <header className="fixed top-0 left-0 right-0 z-50 flex justify-center px-4 pt-4 pointer-events-none">
-        <div className={`pointer-events-auto flex flex-col w-full max-w-6xl transition-all duration-300 ${scrolled ? 'translate-y-0' : 'translate-y-1'}`}>
+        <div className={`pointer-events-auto flex flex-col w-full max-w-7xl transition-all duration-300 ${scrolled ? 'translate-y-0' : 'translate-y-1'}`}>
 
           {/* Main Island Pill */}
           <div className={`
-            flex items-center justify-between gap-4 rounded-[2rem] border transition-all duration-500
+            flex items-center justify-between gap-2 sm:gap-4 rounded-[2rem] border transition-all duration-500 overflow-hidden
             ${scrolled
               ? isDark
-                ? 'bg-[#000000]/70 backdrop-blur-3xl border-[#333333]/80 shadow-[0_16px_32px_-8px_rgba(0,0,0,0.8)] py-2.5 px-4'
-                : 'bg-white/70 backdrop-blur-3xl border-[#E2E6F0]/80 shadow-[0_16px_32px_-8px_rgba(0,0,0,0.1)] py-2.5 px-4'
+                ? 'bg-[#000000]/75 backdrop-blur-3xl border-[#333333]/80 shadow-[0_16px_32px_-8px_rgba(0,0,0,0.8)] py-2 px-3 sm:px-4'
+                : 'bg-white/80 backdrop-blur-3xl border-[#E2E6F0]/80 shadow-[0_16px_32px_-8px_rgba(0,0,0,0.1)] py-2 px-3 sm:px-4'
               : isDark
-                ? 'bg-[#111111]/90 backdrop-blur-2xl border-[#333333] shadow-[0_8px_24px_-4px_rgba(0,0,0,0.6)] py-3 px-5'
-                : 'bg-white/90 backdrop-blur-2xl border-[#E2E6F0] shadow-[0_8px_24px_-4px_rgba(0,0,0,0.08)] py-3 px-5'
+                ? 'bg-[#111111]/90 backdrop-blur-2xl border-[#333333] shadow-[0_8px_24px_-4px_rgba(0,0,0,0.6)] py-2.5 px-3.5 sm:px-5'
+                : 'bg-white/90 backdrop-blur-2xl border-[#E2E6F0] shadow-[0_8px_24px_-4px_rgba(0,0,0,0.08)] py-2.5 px-3.5 sm:px-5'
             }
           `}>
 
             {/* Brand */}
-            <Link href="/" className="flex items-center gap-3 flex-shrink-0 group">
-              <div className={`relative h-9 w-9 rounded-full border flex items-center justify-center overflow-hidden flex-shrink-0 group-hover:border-[#E85002]/50 transition-colors ${isDark ? 'bg-[#111111] border-[#333333]' : 'bg-[#F6F7FB] border-[#E2E6F0]'}`}>
+            <Link href="/" className="flex items-center gap-2.5 sm:gap-3 flex-shrink-0 group">
+              <div className={`relative h-8 w-8 sm:h-9 sm:w-9 rounded-full border flex items-center justify-center overflow-hidden flex-shrink-0 group-hover:border-[#E85002]/50 transition-colors ${isDark ? 'bg-[#111111] border-[#333333]' : 'bg-[#F6F7FB] border-[#E2E6F0]'}`}>
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(232,80,2,0.2)_0%,transparent_70%)] opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 <Target size={18} weight="bold" className={`group-hover:text-[#E85002] transition-colors relative z-10 ${isDark ? 'text-[#F9F9F9]' : 'text-[#0D0F14]'}`} />
               </div>
-              <div className="hidden md:block">
-                <div className={`text-[13px] font-black tracking-tight leading-none uppercase ${isDark ? 'text-[#F9F9F9]' : 'text-[#0D0F14]'}`}>
+              <div className="hidden sm:block">
+                <div className={`text-[12px] sm:text-[13px] font-black tracking-tight leading-none uppercase ${isDark ? 'text-[#F9F9F9]' : 'text-[#0D0F14]'}`}>
                   ARGUS<span className="text-[#E85002]"> AI</span>
                 </div>
               </div>
             </Link>
 
             {/* Primary Nav / Case Context */}
-            <div className={`hidden lg:flex items-center rounded-full p-1 border ${isDark ? 'bg-[#000000] border-[#333333]' : 'bg-[#F6F7FB] border-[#E2E6F0]'}`}>
+            <div className={`hidden lg:flex items-center rounded-full p-1 border min-w-0 flex-shrink ${isDark ? 'bg-[#000000] border-[#333333]' : 'bg-[#F6F7FB] border-[#E2E6F0]'}`}>
               {currentCaseId ? (
-                <div className="flex items-center pl-3 pr-1">
+                <div className="flex items-center pl-2.5 pr-1">
                   <Link
                     href="/"
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold font-mono uppercase tracking-wider border border-transparent transition-all duration-200 mr-1 ${isDark ? 'text-[#646464] hover:text-[#F9F9F9] hover:bg-[#111111]/50' : 'text-[#8B95AD] hover:text-[#0D0F14] hover:bg-[#E2E6F0]/50'}`}
+                    title="Home"
+                    className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[11px] font-bold font-mono uppercase tracking-wider border border-transparent transition-all duration-200 mr-1 flex-shrink-0 ${isDark ? 'text-[#646464] hover:text-[#F9F9F9] hover:bg-[#111111]/50' : 'text-[#8B95AD] hover:text-[#0D0F14] hover:bg-[#E2E6F0]/50'}`}
                   >
                     <House size={14} weight="regular" />
-                    <span className="hidden xl:inline">Home</span>
+                    <span className="hidden 2xl:inline">Home</span>
                   </Link>
-                  <div className={`w-px h-4 mr-2 ${isDark ? 'bg-[#333333]' : 'bg-[#E2E6F0]'}`} />
-                  <div className="flex items-center gap-2 mr-3">
+                  <div className={`w-px h-4 mr-2 flex-shrink-0 ${isDark ? 'bg-[#333333]' : 'bg-[#E2E6F0]'}`} />
+                  <div className="flex items-center gap-1.5 mr-2.5 flex-shrink-0">
                     <span className={`text-[10px] font-mono font-bold uppercase tracking-widest ${isDark ? 'text-[#646464]' : 'text-[#8B95AD]'}`}>Case</span>
                     <span className="text-[11px] font-mono font-bold text-[#E85002]">#{currentCaseId}</span>
                   </div>
-                  <div className={`w-px h-4 mr-2 ${isDark ? 'bg-[#333333]' : 'bg-[#E2E6F0]'}`} />
-                  <div className="flex items-center gap-1">
+                  <div className={`w-px h-4 mr-1.5 flex-shrink-0 ${isDark ? 'bg-[#333333]' : 'bg-[#E2E6F0]'}`} />
+                  <div className="flex items-center gap-0.5 xl:gap-1">
                     {caseSteps.map((step) => {
                       const isActive = step.exact
                         ? pathname === step.href
@@ -138,9 +139,10 @@ export default function FloatingIslandNav() {
                         <Link
                           key={step.href}
                           href={step.href}
+                          title={step.label}
                           className={`
-                            flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold font-mono uppercase tracking-wider
-                            transition-all duration-200
+                            flex items-center gap-1.5 px-2.5 xl:px-3 py-1.5 rounded-full text-[11px] font-bold font-mono uppercase tracking-wider
+                            transition-all duration-200 flex-shrink-0
                             ${isActive
                               ? 'bg-[#E85002] text-[#000000] shadow-[0_0_12px_rgba(232,80,2,0.4)]'
                               : isDark
@@ -150,7 +152,7 @@ export default function FloatingIslandNav() {
                           `}
                         >
                           <Icon size={14} weight={isActive ? 'fill' : 'regular'} />
-                          <span className={!isActive ? 'hidden xl:inline' : ''}>{step.label}</span>
+                          <span className={!isActive ? 'hidden 2xl:inline' : ''}>{step.label}</span>
                         </Link>
                       );
                     })}
@@ -170,8 +172,8 @@ export default function FloatingIslandNav() {
                         key={item.href}
                         href={item.href}
                         className={`
-                          flex items-center gap-2 px-4 py-1.5 rounded-full text-[12px] font-bold uppercase tracking-wider
-                          transition-all duration-200
+                          flex items-center gap-2 px-3.5 sm:px-4 py-1.5 rounded-full text-[12px] font-bold uppercase tracking-wider
+                          transition-all duration-200 flex-shrink-0
                           ${active
                             ? isDark
                               ? 'bg-[#111111] text-[#F9F9F9] border border-[#333333] shadow-sm'
@@ -192,10 +194,10 @@ export default function FloatingIslandNav() {
             </div>
 
             {/* Right Controls */}
-            <div className="flex items-center gap-2 flex-shrink-0 ml-auto lg:ml-0">
+            <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0 ml-auto lg:ml-0">
               <button
                 onClick={() => setIsSearchOpen(true)}
-                className={`flex items-center gap-2 px-2.5 py-1.5 rounded-full border transition-all cursor-pointer group ${isDark ? 'bg-[#111111] border-[#333333] text-[#A7A7A7] hover:text-[#F9F9F9] hover:border-[#646464]' : 'bg-[#F6F7FB] border-[#E2E6F0] text-[#8B95AD] hover:text-[#0D0F14] hover:border-[#A7A7A7]'}`}
+                className={`flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-full border transition-all cursor-pointer group flex-shrink-0 ${isDark ? 'bg-[#111111] border-[#333333] text-[#A7A7A7] hover:text-[#F9F9F9] hover:border-[#646464]' : 'bg-[#F6F7FB] border-[#E2E6F0] text-[#8B95AD] hover:text-[#0D0F14] hover:border-[#A7A7A7]'}`}
                 aria-label="Search"
               >
                 <MagnifyingGlass size={14} weight="bold" className="group-hover:scale-110 transition-transform flex-shrink-0" />
@@ -204,20 +206,22 @@ export default function FloatingIslandNav() {
                 </span>
               </button>
 
-              <ThemeToggle />
+              <div className="flex-shrink-0">
+                <ThemeToggle />
+              </div>
 
-              <button className={`flex items-center gap-2 pl-1 pr-3 py-1 rounded-full border transition-all cursor-pointer group ${isDark ? 'bg-[#111111] border-[#333333] hover:border-[#646464]' : 'bg-[#F6F7FB] border-[#E2E6F0] hover:border-[#A7A7A7]'}`}>
-                <div className="h-7 w-7 rounded-full bg-gradient-to-br from-[#E85002] to-[#C10801] flex items-center justify-center flex-shrink-0 group-hover:shadow-[0_0_12px_rgba(232,80,2,0.4)] transition-shadow">
-                  <span className="text-white text-[10px] font-black tracking-tighter">HA</span>
+              <div className={`flex items-center gap-1.5 sm:gap-2 pl-1 pr-2.5 sm:pr-3 py-1 rounded-full border transition-all cursor-pointer group flex-shrink-0 ${isDark ? 'bg-[#111111] border-[#333333] hover:border-[#646464]' : 'bg-[#F6F7FB] border-[#E2E6F0] hover:border-[#A7A7A7]'}`}>
+                <div className="h-6 w-6 sm:h-7 sm:w-7 rounded-full bg-gradient-to-br from-[#E85002] to-[#C10801] flex items-center justify-center flex-shrink-0 group-hover:shadow-[0_0_12px_rgba(232,80,2,0.4)] transition-shadow">
+                  <span className="text-white text-[9px] sm:text-[10px] font-black tracking-tighter">HA</span>
                 </div>
-                <span className={`hidden sm:block text-[11px] font-bold transition-colors ${isDark ? 'text-[#A7A7A7] group-hover:text-[#F9F9F9]' : 'text-[#5A6480] group-hover:text-[#0D0F14]'}`}>
+                <span className={`hidden sm:inline-block text-[11px] font-bold truncate max-w-[70px] transition-colors ${isDark ? 'text-[#A7A7A7] group-hover:text-[#F9F9F9]' : 'text-[#5A6480] group-hover:text-[#0D0F14]'}`}>
                   Hameed
                 </span>
-              </button>
+              </div>
 
               <button
                 onClick={() => setIsMobileOpen((p) => !p)}
-                className={`w-9 h-9 flex items-center justify-center rounded-full lg:hidden border transition-colors cursor-pointer ${isDark ? 'bg-[#111111] border-[#333333] text-[#A7A7A7] hover:text-[#F9F9F9]' : 'bg-[#F6F7FB] border-[#E2E6F0] text-[#8B95AD] hover:text-[#0D0F14]'}`}
+                className={`w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-full lg:hidden border transition-colors cursor-pointer flex-shrink-0 ${isDark ? 'bg-[#111111] border-[#333333] text-[#A7A7A7] hover:text-[#F9F9F9]' : 'bg-[#F6F7FB] border-[#E2E6F0] text-[#8B95AD] hover:text-[#0D0F14]'}`}
               >
                 {isMobileOpen ? <X size={16} weight="bold" /> : <List size={16} weight="bold" />}
               </button>

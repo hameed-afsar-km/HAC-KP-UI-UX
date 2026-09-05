@@ -138,32 +138,32 @@ export default function QualityReviewPage() {
     <div className="space-y-6 animate-fade-up">
       {/* Toast Alert */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 px-5 py-3.5 rounded-xl bg-[#111111] border border-[#E85002] text-[#F9F9F9] text-xs font-mono font-bold shadow-2xl shadow-[#E85002]/30 flex items-center gap-3 animate-in fade-in slide-in-from-bottom-4 duration-200">
+        <div className="fixed bottom-6 right-6 z-50 px-5 py-3.5 rounded-xl bg-white dark:bg-[#111111] border border-[#E85002] text-[#0D0F14] dark:text-[#F9F9F9] text-xs font-mono font-bold shadow-2xl shadow-[#E85002]/30 flex items-center gap-3 animate-in fade-in slide-in-from-bottom-4 duration-200">
           <Check size={16} className="text-[#E85002]" weight="bold" />
           <span>{toastMessage}</span>
         </div>
       )}
 
       {/* Header Banner */}
-      <div className="bg-[#111111] border border-[#333333] rounded-[2rem] overflow-hidden shadow-2xl">
-        <div className="px-8 py-4 border-b border-[#333333] bg-[#000000] flex flex-wrap items-center justify-between gap-4">
+      <div className="bg-white dark:bg-[#111111] border border-[#E2E6F0] dark:border-[#333333] rounded-[2rem] overflow-hidden shadow-sm dark:shadow-2xl">
+        <div className="px-8 py-4 border-b border-[#E2E6F0] dark:border-[#333333] bg-[#F6F7FB] dark:bg-[#000000] flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <span className="text-[11px] font-mono font-bold uppercase tracking-widest bg-[#E85002] text-[#000000] px-3 py-1 rounded-md">
               STAGE 04
             </span>
-            <span className="text-[11px] font-mono font-bold uppercase tracking-widest text-[#A7A7A7]">
+            <span className="text-[11px] font-mono font-bold uppercase tracking-widest text-[#8B95AD] dark:text-[#A7A7A7]">
               CASE #{caseId}
             </span>
           </div>
 
           <div className="flex items-center gap-3 text-xs font-mono">
-            <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-bold">
+            <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-400 font-bold">
               ✓ {stats.approved} Approved
             </span>
-            <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-amber-500/10 border border-amber-500/20 text-amber-400 font-bold">
+            <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400 font-bold">
               ! {stats.flagged} Flagged
             </span>
-            <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[#222222] border border-[#333333] text-[#A7A7A7] font-bold">
+            <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[#F0F0F0] dark:bg-[#222222] border border-[#E2E6F0] dark:border-[#333333] text-[#8B95AD] dark:text-[#A7A7A7] font-bold">
               {stats.pending} Pending
             </span>
           </div>
@@ -171,10 +171,10 @@ export default function QualityReviewPage() {
 
         <div className="px-8 py-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2 max-w-3xl">
-            <h1 className="text-2xl sm:text-3xl font-black text-[#F9F9F9] tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-black text-[#0D0F14] dark:text-[#F9F9F9] tracking-tight">
               Officer Verification &amp; Quality Review
             </h1>
-            <p className="text-[14px] text-[#A7A7A7] leading-relaxed">
+            <p className="text-[14px] text-[#8B95AD] dark:text-[#A7A7A7] leading-relaxed">
               Verify machine-extracted entities against original source texts. Confirm accurate tokens, adjust normalized values, or flag ambiguous extractions before advancing to entity resolution.
             </p>
           </div>
@@ -194,17 +194,17 @@ export default function QualityReviewPage() {
       {/* Main Review Workspace */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Left: Review Queue (4 cols) */}
-        <div className="lg:col-span-4 bg-[#111111] border border-[#333333] rounded-[2rem] p-6 shadow-2xl space-y-4">
-          <div className="flex items-center justify-between pb-3 border-b border-[#333333]">
+        <div className="lg:col-span-4 bg-white dark:bg-[#111111] border border-[#E2E6F0] dark:border-[#333333] rounded-[2rem] p-6 shadow-sm dark:shadow-2xl space-y-4">
+          <div className="flex items-center justify-between pb-3 border-b border-[#E2E6F0] dark:border-[#333333]">
             <div className="flex items-center gap-2">
               <span className="text-xs font-mono font-bold text-[#E85002] uppercase tracking-wider">
                 Verification Queue
               </span>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[#222222] text-[#F9F9F9] border border-[#333333]">
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[#F0F0F0] dark:bg-[#222222] text-[#0D0F14] dark:text-[#F9F9F9] border border-[#E2E6F0] dark:border-[#333333]">
                 {reviewItems.length}
               </span>
             </div>
-            <span className="text-[11px] font-mono text-[#A7A7A7]">
+            <span className="text-[11px] font-mono text-[#8B95AD] dark:text-[#A7A7A7]">
               Item {selectedIndex + 1} of {reviewItems.length}
             </span>
           </div>
@@ -219,7 +219,7 @@ export default function QualityReviewPage() {
                 className={`px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold uppercase tracking-wider border transition-all cursor-pointer ${
                   filter === tab
                     ? 'bg-[#E85002] text-white border-[#E85002]'
-                    : 'bg-[#000000] text-[#A7A7A7] border-[#333333] hover:border-[#646464] hover:text-[#F9F9F9]'
+                    : 'bg-white dark:bg-[#000000] text-[#8B95AD] dark:text-[#A7A7A7] border-[#E2E6F0] dark:border-[#333333] hover:border-[#E85002]/50 hover:text-[#0D0F14] dark:hover:text-[#F9F9F9]'
                 }`}
               >
                 {tab}
@@ -229,7 +229,7 @@ export default function QualityReviewPage() {
 
           <div className="space-y-2.5 max-h-[620px] overflow-y-auto pr-1">
             {filteredIndices.length === 0 ? (
-              <div className="py-12 text-center text-xs font-mono text-[#646464]">
+              <div className="py-12 text-center text-xs font-mono text-[#8B95AD] dark:text-[#646464]">
                 No items match the selected filter.
               </div>
             ) : (
@@ -243,8 +243,8 @@ export default function QualityReviewPage() {
                     onClick={() => handleSelect(idx)}
                     className={`p-4 rounded-xl border transition-all cursor-pointer space-y-2 relative overflow-hidden ${
                       isSelected
-                        ? 'border-[#E85002] bg-[#1a1410] shadow-[0_0_15px_rgba(232,80,2,0.15)] ring-1 ring-[#E85002]/40'
-                        : 'border-[#333333] bg-[#000000] hover:border-[#E85002]/50 hover:bg-[#161616]'
+                        ? 'border-[#E85002] bg-[#E85002]/10 shadow-[0_0_15px_rgba(232,80,2,0.15)] ring-1 ring-[#E85002]/40'
+                        : 'border-[#E2E6F0] dark:border-[#333333] bg-[#F6F7FB] dark:bg-[#000000] hover:border-[#E85002]/50 hover:bg-white dark:hover:bg-[#161616]'
                     }`}
                   >
                     {isSelected && (
@@ -260,15 +260,15 @@ export default function QualityReviewPage() {
                       </span>
                     </div>
 
-                    <div className="font-bold text-sm text-[#F9F9F9] truncate">
+                    <div className="font-bold text-sm text-[#0D0F14] dark:text-[#F9F9F9] truncate">
                       {item.entityValue}
                     </div>
 
-                    <div className="flex items-center justify-between text-[11px] font-mono text-[#A7A7A7] pt-1 border-t border-[#222222]">
+                    <div className="flex items-center justify-between text-[11px] font-mono text-[#8B95AD] dark:text-[#A7A7A7] pt-1 border-t border-[#E2E6F0] dark:border-[#222222]">
                       <span className="text-[#E85002] font-semibold">
                         {(item.confidence * 100).toFixed(0)}% Conf
                       </span>
-                      <span className="truncate max-w-[150px] text-[#646464]">
+                      <span className="truncate max-w-[150px] text-[#8B95AD] dark:text-[#646464]">
                         {item.sourceDocument}
                       </span>
                     </div>
@@ -281,9 +281,9 @@ export default function QualityReviewPage() {
 
         {/* Right: Inspection & Decision Console (8 cols) */}
         {currentItem ? (
-          <div className="lg:col-span-8 bg-[#111111] border border-[#333333] rounded-[2rem] p-6 sm:p-8 shadow-2xl space-y-6">
+          <div className="lg:col-span-8 bg-white dark:bg-[#111111] border border-[#E2E6F0] dark:border-[#333333] rounded-[2rem] p-6 sm:p-8 shadow-sm dark:shadow-2xl space-y-6">
             {/* Header info */}
-            <div className="flex flex-wrap items-start justify-between gap-4 pb-6 border-b border-[#333333]">
+            <div className="flex flex-wrap items-start justify-between gap-4 pb-6 border-b border-[#E2E6F0] dark:border-[#333333]">
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <span className={`px-2.5 py-0.5 rounded-md font-mono text-xs font-bold border uppercase tracking-wider ${getEntityTypeBadge(currentItem.entityType)}`}>
@@ -296,13 +296,13 @@ export default function QualityReviewPage() {
                     {currentItem.reviewStatus || 'PENDING REVIEW'}
                   </span>
                 </div>
-                <h2 className="text-2xl sm:text-3xl font-black text-[#F9F9F9] tracking-tight">
+                <h2 className="text-2xl sm:text-3xl font-black text-[#0D0F14] dark:text-[#F9F9F9] tracking-tight">
                   {currentItem.entityValue}
                 </h2>
               </div>
 
-              <div className="bg-[#000000] border border-[#333333] rounded-xl px-5 py-3 text-right">
-                <span className="text-[11px] font-mono text-[#A7A7A7] uppercase tracking-widest block">
+              <div className="bg-[#F6F7FB] dark:bg-[#000000] border border-[#E2E6F0] dark:border-[#333333] rounded-xl px-5 py-3 text-right">
+                <span className="text-[11px] font-mono text-[#8B95AD] dark:text-[#A7A7A7] uppercase tracking-widest block">
                   Model Score
                 </span>
                 <span className="text-2xl font-black font-mono text-[#E85002]">
@@ -320,14 +320,14 @@ export default function QualityReviewPage() {
                 </span>
               </div>
 
-              <div className="p-5 rounded-2xl bg-[#000000] border border-[#333333] font-mono text-xs leading-relaxed text-[#D4D4D4] whitespace-pre-wrap selection:bg-[#E85002]">
+              <div className="p-5 rounded-2xl bg-[#F6F7FB] dark:bg-[#000000] border border-[#E2E6F0] dark:border-[#333333] font-mono text-xs leading-relaxed text-[#0D0F14] dark:text-[#D4D4D4] whitespace-pre-wrap selection:bg-[#E85002]">
                 {(currentItem.surroundingText || currentItem.sourceSnippet || '')
                   .split(currentItem.entityValue)
                   .map((part: string, i: number, arr: string[]) => (
                     <React.Fragment key={i}>
                       {part}
                       {i < arr.length - 1 && (
-                        <mark className="bg-[#E85002]/30 text-[#F9F9F9] px-2 py-0.5 rounded font-bold border border-[#E85002]/60 inline-block mx-0.5">
+                        <mark className="bg-[#E85002]/30 text-[#000000] dark:text-[#F9F9F9] px-2 py-0.5 rounded font-bold border border-[#E85002]/60 inline-block mx-0.5">
                           {currentItem.entityValue}
                         </mark>
                       )}
@@ -335,12 +335,12 @@ export default function QualityReviewPage() {
                   ))}
               </div>
 
-              <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] font-mono text-[#A7A7A7] px-1">
+              <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] font-mono text-[#8B95AD] dark:text-[#A7A7A7] px-1">
                 <span>
                   Source Artifact:{' '}
-                  <strong className="text-[#F9F9F9] font-medium">{currentItem.sourceDocument}</strong>
+                  <strong className="text-[#0D0F14] dark:text-[#F9F9F9] font-medium">{currentItem.sourceDocument}</strong>
                 </span>
-                <span className="text-[#646464]">Byte Offset Range: [1420 - 1465]</span>
+                <span className="text-[#8B95AD] dark:text-[#646464]">Byte Offset Range: [1420 - 1465]</span>
               </div>
             </div>
 
@@ -365,13 +365,13 @@ export default function QualityReviewPage() {
                   type="text"
                   value={editValue}
                   onChange={(e) => setEditValue(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl border border-[#E85002] bg-[#000000] text-sm font-mono font-bold text-[#F9F9F9] outline-none shadow-inner"
+                  className="w-full px-4 py-3 rounded-xl border border-[#E85002] bg-[#F6F7FB] dark:bg-[#000000] text-sm font-mono font-bold text-[#0D0F14] dark:text-[#F9F9F9] outline-none shadow-inner"
                   autoFocus
                 />
               ) : (
-                <div className="p-4 rounded-xl bg-[#000000] border border-[#333333] text-sm font-mono font-bold text-[#F9F9F9] flex items-center justify-between">
+                <div className="p-4 rounded-xl bg-[#F6F7FB] dark:bg-[#000000] border border-[#E2E6F0] dark:border-[#333333] text-sm font-mono font-bold text-[#0D0F14] dark:text-[#F9F9F9] flex items-center justify-between">
                   <span>{editValue}</span>
-                  <span className="text-[10px] text-[#646464] font-normal uppercase tracking-wider">Verified Token</span>
+                  <span className="text-[10px] text-[#8B95AD] dark:text-[#646464] font-normal uppercase tracking-wider">Verified Token</span>
                 </div>
               )}
             </div>
@@ -387,31 +387,31 @@ export default function QualityReviewPage() {
                 placeholder="Enter justification, cross-reference document, or context for approval/rejection..."
                 value={activeComment}
                 onChange={(e) => setActiveComment(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border border-[#333333] bg-[#000000] text-xs font-mono text-[#F9F9F9] placeholder-[#646464] outline-none focus:border-[#E85002] transition-colors resize-none leading-relaxed"
+                className="w-full px-4 py-3 rounded-xl border border-[#E2E6F0] dark:border-[#333333] bg-[#F6F7FB] dark:bg-[#000000] text-xs font-mono text-[#0D0F14] dark:text-[#F9F9F9] placeholder-[#8B95AD] dark:placeholder-[#646464] outline-none focus:border-[#E85002] transition-colors resize-none leading-relaxed"
               />
             </div>
 
             {/* Decision Bar */}
-            <div className="flex flex-wrap items-center justify-between gap-4 pt-6 border-t border-[#333333]">
+            <div className="flex flex-wrap items-center justify-between gap-4 pt-6 border-t border-[#E2E6F0] dark:border-[#333333]">
               {/* Pagination Controls */}
               <div className="flex items-center gap-2">
                 <button
                   type="button"
                   disabled={selectedIndex === 0}
                   onClick={() => handleSelect(selectedIndex - 1)}
-                  className="p-2.5 rounded-xl bg-[#000000] hover:bg-[#222222] border border-[#333333] disabled:opacity-25 text-[#F9F9F9] cursor-pointer transition-colors"
+                  className="p-2.5 rounded-xl bg-[#F6F7FB] hover:bg-[#E2E6F0] dark:bg-[#000000] dark:hover:bg-[#222222] border border-[#E2E6F0] dark:border-[#333333] disabled:opacity-25 text-[#0D0F14] dark:text-[#F9F9F9] cursor-pointer transition-colors"
                   title="Previous Item"
                 >
                   <CaretLeft size={16} weight="bold" />
                 </button>
-                <span className="text-xs font-mono text-[#A7A7A7] px-2">
+                <span className="text-xs font-mono text-[#8B95AD] dark:text-[#A7A7A7] px-2">
                   {selectedIndex + 1} / {reviewItems.length}
                 </span>
                 <button
                   type="button"
                   disabled={selectedIndex === reviewItems.length - 1}
                   onClick={() => handleSelect(selectedIndex + 1)}
-                  className="p-2.5 rounded-xl bg-[#000000] hover:bg-[#222222] border border-[#333333] disabled:opacity-25 text-[#F9F9F9] cursor-pointer transition-colors"
+                  className="p-2.5 rounded-xl bg-[#F6F7FB] hover:bg-[#E2E6F0] dark:bg-[#000000] dark:hover:bg-[#222222] border border-[#E2E6F0] dark:border-[#333333] disabled:opacity-25 text-[#0D0F14] dark:text-[#F9F9F9] cursor-pointer transition-colors"
                   title="Next Item"
                 >
                   <CaretRight size={16} weight="bold" />
@@ -423,7 +423,7 @@ export default function QualityReviewPage() {
                 <button
                   type="button"
                   onClick={() => updateDecision('FLAGGED')}
-                  className="flex items-center gap-2 px-4 py-3 rounded-xl bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 border border-amber-500/30 text-xs font-bold font-mono uppercase tracking-wider transition-all cursor-pointer"
+                  className="flex items-center gap-2 px-4 py-3 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 hover:bg-amber-500/20 border border-amber-500/30 text-xs font-bold font-mono uppercase tracking-wider transition-all cursor-pointer"
                 >
                   <Flag size={15} weight="bold" />
                   <span>Flag</span>
@@ -432,7 +432,7 @@ export default function QualityReviewPage() {
                 <button
                   type="button"
                   onClick={() => updateDecision('REJECTED')}
-                  className="flex items-center gap-2 px-4 py-3 rounded-xl bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 border border-rose-500/30 text-xs font-bold font-mono uppercase tracking-wider transition-all cursor-pointer"
+                  className="flex items-center gap-2 px-4 py-3 rounded-xl bg-rose-500/10 text-rose-600 dark:text-rose-400 hover:bg-rose-500/20 border border-rose-500/30 text-xs font-bold font-mono uppercase tracking-wider transition-all cursor-pointer"
                 >
                   <XCircle size={15} weight="bold" />
                   <span>Reject</span>
@@ -450,7 +450,7 @@ export default function QualityReviewPage() {
             </div>
           </div>
         ) : (
-          <div className="lg:col-span-8 bg-[#111111] border border-[#333333] rounded-[2rem] p-12 text-center text-[#A7A7A7] font-mono text-sm">
+          <div className="lg:col-span-8 bg-white dark:bg-[#111111] border border-[#E2E6F0] dark:border-[#333333] rounded-[2rem] p-12 text-center text-[#8B95AD] dark:text-[#A7A7A7] font-mono text-sm">
             Select an item from the verification queue to inspect details.
           </div>
         )}

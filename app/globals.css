@@ -178,6 +178,17 @@
   transition: transform 0.2s ease;
 }
 
+/* ─── Light-theme 1px border stroke (black-to-grey) ──────────────────────── */
+.border-\[\#E2E6F0\] {
+  --tw-border-opacity: 1;
+  border-color: rgb(178 186 198 / var(--tw-border-opacity));
+}
+
+.border-\[\#E2E6F0\]\/80 {
+  --tw-border-opacity: 0.8;
+  border-color: rgb(178 186 198 / var(--tw-border-opacity));
+}
+
 /* ─── Status Badges ───────────────────────────────────────────────────────── */
 .badge {
   display: inline-flex;

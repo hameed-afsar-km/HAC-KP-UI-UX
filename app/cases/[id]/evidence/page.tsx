@@ -109,17 +109,17 @@ export default function EvidencePage() {
   return (
     <div className="space-y-5 animate-fade-up">
       {/* Page Header */}
-      <div className="bg-[#111111] border border-[#333333] rounded-[2rem] overflow-hidden shadow-2xl">
+      <div className="bg-white dark:bg-[#111111] border border-[#E2E6F0] dark:border-[#333333] rounded-[2rem] overflow-hidden shadow-sm dark:shadow-2xl">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-8 py-6">
           <div className="space-y-1.5">
             <div className="flex items-center gap-2">
               <span className="px-2.5 py-1 rounded-md text-[11px] font-mono font-bold uppercase tracking-wider bg-[#E85002] text-[#000000]">Step 01</span>
-              <span className="text-[11px] font-mono font-bold uppercase tracking-widest text-[#A7A7A7]">Case #{caseId}</span>
+              <span className="text-[11px] font-mono font-bold uppercase tracking-widest text-[#8B95AD] dark:text-[#A7A7A7]">Case #{caseId}</span>
             </div>
-            <h1 className="text-2xl font-black text-[#F9F9F9]">
+            <h1 className="text-2xl font-black text-[#0D0F14] dark:text-[#F9F9F9]">
               Case Files &amp; Documents
             </h1>
-            <p className="text-[14px] text-[#A7A7A7]">
+            <p className="text-[14px] text-[#8B95AD] dark:text-[#A7A7A7]">
               All evidence files for this case. Each file is locked and tamper-proof once uploaded.
             </p>
           </div>
@@ -144,7 +144,7 @@ export default function EvidencePage() {
         </div>
 
         {/* Stats row */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 divide-x divide-[#333333] border-t border-[#333333] bg-[#000000]">
+        <div className="grid grid-cols-2 sm:grid-cols-4 divide-x divide-[#E2E6F0] dark:divide-[#333333] border-t border-[#E2E6F0] dark:border-[#333333] bg-[#F6F7FB] dark:bg-[#000000]">
           {[
             { label: 'Files uploaded', value: `${files.length}` },
             { label: 'Tamper protection', value: 'SHA-256', accent: true },
@@ -152,15 +152,15 @@ export default function EvidencePage() {
             { label: 'Storage', value: 'Encrypted' },
           ].map((s) => (
             <div key={s.label} className="px-6 py-4">
-              <p className="text-[11px] font-mono font-semibold text-[#A7A7A7] uppercase tracking-wider">{s.label}</p>
-              <p className={`text-[16px] font-mono font-bold mt-0.5 ${s.accent ? 'text-[#E85002]' : 'text-[#F9F9F9]'}`}>{s.value}</p>
+              <p className="text-[11px] font-mono font-semibold text-[#8B95AD] dark:text-[#A7A7A7] uppercase tracking-wider">{s.label}</p>
+              <p className={`text-[16px] font-mono font-bold mt-0.5 ${s.accent ? 'text-[#E85002]' : 'text-[#0D0F14] dark:text-[#F9F9F9]'}`}>{s.value}</p>
             </div>
           ))}
         </div>
       </div>
 
       {/* Evidence Table */}
-      <div className="bg-[#111111] border border-[#333333] rounded-[2rem] overflow-hidden shadow-2xl">
+      <div className="bg-white dark:bg-[#111111] border border-[#E2E6F0] dark:border-[#333333] rounded-[2rem] overflow-hidden shadow-sm dark:shadow-2xl">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead className="border-b border-[#E2E2E2] bg-[#F0F0F0] dark:border-[#333333] dark:bg-[#000000] font-mono text-[#000000] dark:text-[#F9F9F9]">

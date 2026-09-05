@@ -1,7 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
 import { getCases } from '@/lib/api';
-import { BeamsBackground } from '@/components/ui/beams-background';
 import {
   Briefcase,
   Fingerprint,
@@ -44,7 +43,7 @@ function MetricNode({ label, value, sub, icon: Icon, accent }: any) {
 
 const QUICK_TOOLS = [
   { title: 'Connections Map',   sub: 'Visualise the network',        href: '/cases/1001/graph',          icon: ShareNetwork },
-  { title: 'Knowledge Base',    sub: 'Ontology and entity types',    href: '/ontology/entities',         icon: TreeStructure },
+  { title: 'Ontology',       sub: 'Entity and relationship types',   href: '/ontology/entities',         icon: TreeStructure },
   { title: 'Extraction Jobs',   sub: 'Run analysis on new files',    href: '/cases/1001/jobs',           icon: Cpu },
   { title: 'Case Files',        sub: 'Upload and manage evidence',   href: '/cases/1001/evidence',       icon: Files },
 ];
@@ -63,7 +62,6 @@ export default async function DashboardPage() {
   const total  = cases.length;
 
   return (
-    <BeamsBackground intensity="subtle">
     <div className="max-w-[1400px] mx-auto space-y-8 pb-20 mt-4 px-4 sm:px-6 lg:px-8">
 
       {/* Welcome Header */}
@@ -154,7 +152,7 @@ export default async function DashboardPage() {
           {/* Quick Tools */}
           <div>
             <div className="flex items-center justify-between mb-4 px-1">
-              <h2 className="text-[12px] font-mono font-bold text-[#8B95AD] dark:text-[#A7A7A7] uppercase tracking-widest">Quick Actions</h2>
+              <h2 className="text-[12px] font-mono font-bold text-black dark:text-[#A7A7A7] uppercase tracking-widest">Quick Actions</h2>
             </div>
             <div className="flex flex-col gap-3">
               {QUICK_TOOLS.map((tool) => {
@@ -170,7 +168,7 @@ export default async function DashboardPage() {
                         <Icon size={18} weight="regular" className="text-[#8B95AD] dark:text-[#A7A7A7] group-hover:text-white transition-colors" />
                       </div>
                       <div>
-                        <p className="text-[13px] font-bold text-[#0D0F14] dark:text-[#F9F9F9] group-hover:text-[#E85002] transition-colors">{tool.title}</p>
+                        <p className="text-[13px] font-bold text-black dark:text-[#F9F9F9] group-hover:text-[#E85002] transition-colors">{tool.title}</p>
                         <p className="text-[11px] text-[#8B95AD] dark:text-[#646464] mt-0.5">{tool.sub}</p>
                       </div>
                     </div>
@@ -184,7 +182,7 @@ export default async function DashboardPage() {
           {/* Active Cases */}
           <div className="bg-white dark:bg-[#111111] border border-[#E2E6F0] dark:border-[#333333] rounded-3xl overflow-hidden shadow-sm dark:shadow-2xl dark:shadow-black/50 p-1">
             <div className="flex items-center justify-between px-5 py-4">
-              <h2 className="text-[12px] font-mono font-bold text-[#8B95AD] dark:text-[#A7A7A7] uppercase tracking-widest">Active Cases</h2>
+              <h2 className="text-[12px] font-mono font-bold text-black dark:text-[#A7A7A7] uppercase tracking-widest">Active Cases</h2>
               <Link href="/cases" className="text-[10px] font-mono font-bold text-[#E85002] hover:text-[#F16001] transition-colors uppercase">
                 View All →
               </Link>
@@ -200,7 +198,7 @@ export default async function DashboardPage() {
                     <span className="font-mono text-[11px] font-bold text-[#E85002]">#{c.id}</span>
                     <span className="text-[9px] font-mono font-bold uppercase px-2 py-0.5 rounded-full bg-[#F6F7FB] dark:bg-[#111111] text-[#8B95AD] dark:text-[#A7A7A7] border border-[#E2E6F0] dark:border-[#333333]">{c.caseCategory}</span>
                   </div>
-                  <h3 className="text-[13px] font-medium text-[#0D0F14] dark:text-[#F9F9F9] group-hover:text-[#E85002] leading-snug line-clamp-2">
+                  <h3 className="text-[13px] font-medium text-black dark:text-[#F9F9F9] group-hover:text-[#E85002] leading-snug line-clamp-2">
                     {c.caseDescription}
                   </h3>
                 </Link>
@@ -211,6 +209,5 @@ export default async function DashboardPage() {
         </div>
       </div>
     </div>
-    </BeamsBackground>
   );
 }

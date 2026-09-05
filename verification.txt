@@ -1,0 +1,3226 @@
+Frontend: Implement the Evidence and Quality Review UI
+Objective
+Build an investigator-facing Evidence and Quality Review interface for
+reviewing extraction warnings, contradictions, provenance, and aggregated
+evidence sets.
+
+The screen must allow an investigator to trace an extracted finding back to
+the source record and safely record a review decision without modifying or
+hiding the original extraction result.
+
+Reference design
+Image
+User story
+As an investigator, I want to review warnings and contradictions and inspect
+their supporting evidence so that I can assess extraction quality, understand
+uncertain findings, and leave an auditable review decision.
+
+Primary route
+/cases/:caseId/evidence-review
+The selected review item should be addressable in the URL.
+
+Example:
+
+/cases/case_001/evidence-review?type=warning&id=warning_001
+Scope
+The page should combine:
+
+A review queue for warnings, contradictions, and evidence sets.
+A protected source-record viewer with evidence-span highlighting.
+A provenance and extraction-quality panel.
+Review actions, notes, and audit history.
+This interface reviews extraction output. It does not rerun extraction,
+perform entity resolution, or modify source evidence.
+
+Functional requirements
+1. Page header and summary
+Display:
+
+Case ID and case status
+Total items awaiting review
+Warning count
+Contradiction count
+Evidence-set count
+Reviewed and unreviewed counts
+Active filters
+Provide tabs:
+
+Warnings
+Contradictions
+Evidence Sets
+2. Review queue
+Each queue item should display:
+
+Stable item ID
+Code or evidence-set ID
+Severity
+Short message or description
+Related extraction ID
+Related entity or relationship temporary IDs
+Source file
+Detection timestamp
+Review status
+Assigned reviewer, when applicable
+Supported review states:
+
+UNREVIEWED
+IN_REVIEW
+REVIEWED
+DEFERRED
+Provide filters for:
+
+Item category
+Severity
+Review status
+Extraction
+Source file
+Device
+Entity or relationship type
+Extraction method
+Confidence range
+Assigned reviewer
+Provide sorting by:
+
+Severity
+Detection date
+Confidence
+Review status
+The queue must support pagination or virtualized scrolling.
+
+3. Warning review
+Display warning fields from schema 1.1:
+
+code
+severity
+message
+relatedTempIds
+provenance
+Selecting a related temporary ID should open the associated entity or
+relationship details and provide a link to the Extraction Result Explorer.
+
+The sample warning should render as:
+
+AMBIGUOUS_PERSON
+Severity: WARNING
+The account owner could not be identified conclusively.
+Related IDs: file_001:e1, file_001:e4
+4. Contradiction review
+Display structured contradiction information when supplied by the backend:
+
+Contradiction ID
+Type or code
+Severity
+Description
+Conflicting claims
+Related entities or relationships
+Supporting provenance for each claim
+Detection method
+Confidence
+Review status
+Because the current sample has an empty contradictions array, implement:
+
+A clear empty state
+A safe renderer for newly introduced structured properties
+A raw-object fallback for unsupported contradiction types
+The UI must not silently choose one conflicting claim or suppress the other.
+
+5. Evidence-set review
+Display:
+
+Evidence-set ID
+File ID
+Record type
+Record count
+First and last record IDs
+Explicit record IDs, when provided
+Relationships supported by the evidence set
+Allow the investigator to:
+
+Open individual records
+Move to the previous or next record
+Filter records within the evidence set
+Return to the relationship that references the set
+Support both:
+
+Contiguous or ordered ranges represented by firstRecordId and
+lastRecordId
+Explicit non-contiguous records represented by recordIds
+6. Protected source-record viewer
+The source viewer should show:
+
+Source file
+Device
+Record ID
+Record type
+Record timestamp
+Text or metadata content
+Start and end offsets
+Highlighted evidence span
+When startOffset and endOffset are present:
+
+Highlight exactly the referenced span.
+Show the numeric offset range.
+Detect invalid or out-of-range offsets.
+Display a warning if the source content no longer matches the stored span.
+Protected content behavior:
+
+Display metadata before content.
+Do not reveal sensitive content automatically.
+Require a deliberate reveal action when the source is protected.
+Record reveal actions through the audit API.
+Provide a visible indicator while protected content is revealed.
+Clear revealed content when the drawer closes or the user leaves the page.
+7. Provenance and quality panel
+Display:
+
+Extraction ID
+Entity or relationship temporary ID
+Source file and record
+Evidence-set ID, when applicable
+Extractor name and version
+Model name
+Extraction method
+Confidence score
+Assertion type, for relationships
+Extraction timestamp
+Observation timestamps
+Provide links to:
+
+Extraction Result Explorer
+Source record
+Related entity or relationship
+Full evidence set
+8. Review actions
+Provide:
+
+Start review
+Mark reviewed
+Defer
+Reopen
+Add note
+A review action must:
+
+Require an authenticated user.
+Be associated with the warning, contradiction, or evidence set.
+Record the previous and new status.
+Record reviewer identity and timestamp.
+Preserve the original extraction output.
+Produce an audit event.
+The UI should use optimistic updates only when it can safely roll back after an
+API failure.
+
+9. Investigator notes
+Notes should support:
+
+Plain text
+Author and timestamp
+Add and view
+Editing only if permitted by the backend policy
+Visible edit history when notes can be changed
+Extracted or user-supplied text must be rendered as text, never interpreted as
+HTML.
+
+10. Audit trail
+Display recent audit events associated with the selected review item:
+
+Timestamp
+User
+Action
+Previous state
+New state
+Note reference
+Evidence-reveal event
+Workstation or session metadata when authorized
+The frontend must not allow audit entries to be edited or deleted.
+
+11. Loading and error states
+Implement:
+
+Initial queue-loading skeleton
+Selected-item loading state
+Empty warning state
+Empty contradiction state
+Empty evidence-set state
+No-filter-results state
+Missing source-record state
+Invalid evidence-offset warning
+Protected-content unavailable state
+Access-denied state
+API failure state
+Review-action failure with retry
+A failed detail request must not clear the review queue.
+
+Proposed API integration
+Method	Endpoint	Purpose
+GET	/api/v1/cases/{caseId}/evidence-review-items	Load the paginated review queue.
+GET	/api/v1/evidence-review-items/{reviewItemId}	Load a selected warning, contradiction, or evidence-set review item.
+GET	/api/v1/entity-extractions/{extractionId}/warnings	Load extraction warnings.
+GET	/api/v1/entity-extractions/{extractionId}/contradictions	Load extraction contradictions.
+GET	/api/v1/entity-extractions/{extractionId}/evidence-sets/{evidenceSetId}	Load an evidence set and its record references.
+GET	/api/v1/evidence-records/{recordId}	Load source-record metadata.
+POST	/api/v1/evidence-records/{recordId}/reveal	Request protected source content and create an audit event.
+POST	/api/v1/evidence-review-items/{reviewItemId}/actions	Start, complete, defer, or reopen a review.
+GET	/api/v1/evidence-review-items/{reviewItemId}/notes	Load investigator notes.
+POST	/api/v1/evidence-review-items/{reviewItemId}/notes	Add an investigator note.
+GET	/api/v1/evidence-review-items/{reviewItemId}/audit-events	Load the item's audit trail.
+API request and response examples
+These examples define the frontend's expected contract. Backend and frontend
+teams should agree on naming, pagination, and authorization behavior before
+implementation.
+
+1. List evidence-review items
+GET /api/v1/cases/case_001/evidence-review-items?category=WARNING&reviewStatus=UNREVIEWED&limit=20
+Authorization: Bearer <access-token>
+{
+  "caseId": "case_001",
+  "summary": {
+    "total": 3,
+    "unreviewed": 1,
+    "inReview": 0,
+    "reviewed": 2,
+    "deferred": 0,
+    "warningCount": 1,
+    "contradictionCount": 0,
+    "evidenceSetCount": 2
+  },
+  "items": [
+    {
+      "id": "review_001",
+      "category": "WARNING",
+      "extractionId": "ext_001",
+      "fileId": "file_001",
+      "deviceId": "source_device_001",
+      "code": "AMBIGUOUS_PERSON",
+      "severity": "WARNING",
+      "message": "The account owner could not be identified conclusively.",
+      "relatedTempIds": [
+        "file_001:e1",
+        "file_001:e4"
+      ],
+      "primaryProvenance": {
+        "fileId": "file_001",
+        "recordId": "message_001",
+        "startOffset": 0,
+        "endOffset": 8
+      },
+      "reviewStatus": "UNREVIEWED",
+      "assignedTo": null,
+      "detectedAt": "2026-09-01T02:30:00Z",
+      "reviewedAt": null,
+      "reviewedBy": null,
+      "version": 1
+    }
+  ],
+  "pagination": {
+    "limit": 20,
+    "nextCursor": null,
+    "hasMore": false
+  }
+}
+Frontend behavior:
+
+Use summary for tab badges and status counters.
+Use id, not an array index, as the queue-item key.
+Preserve the current queue while loading the next cursor.
+Treat assignedTo: null as unassigned.
+Do not assume counts equal the number of records on the current page.
+2. Get a warning review item
+GET /api/v1/evidence-review-items/review_001
+Authorization: Bearer <access-token>
+{
+  "id": "review_001",
+  "caseId": "case_001",
+  "category": "WARNING",
+  "extractionId": "ext_001",
+  "extractionSchemaVersion": "1.1",
+  "code": "AMBIGUOUS_PERSON",
+  "severity": "WARNING",
+  "message": "The account owner could not be identified conclusively.",
+  "relatedFindings": [
+    {
+      "tempId": "file_001:e1",
+      "kind": "ENTITY",
+      "type": "PERSON",
+      "displayLabel": "Person A",
+      "confidence": 0.94
+    },
+    {
+      "tempId": "file_001:e4",
+      "kind": "ENTITY",
+      "type": "ACCOUNT",
+      "displayLabel": "@sample_user",
+      "confidence": 0.98
+    }
+  ],
+  "provenance": [
+    {
+      "fileId": "file_001",
+      "fileName": "telegram_export.txt",
+      "deviceId": "source_device_001",
+      "recordId": "message_001",
+      "startOffset": 0,
+      "endOffset": 8
+    }
+  ],
+  "extraction": {
+    "extractorName": "entity-relationship-extractor",
+    "extractorVersion": "1.0",
+    "model": "qwen3-14b",
+    "extractionMethod": "LLM",
+    "extractedAt": "2026-09-01T02:30:00Z"
+  },
+  "review": {
+    "status": "UNREVIEWED",
+    "assignedTo": null,
+    "reviewedBy": null,
+    "reviewedAt": null,
+    "version": 1
+  },
+  "permissions": {
+    "canViewMetadata": true,
+    "canRevealContent": true,
+    "canReview": true,
+    "canAddNote": true,
+    "canReopen": false
+  },
+  "links": {
+    "extraction": "/api/v1/entity-extractions/ext_001/result",
+    "sourceRecord": "/api/v1/evidence-records/message_001",
+    "notes": "/api/v1/evidence-review-items/review_001/notes",
+    "auditEvents": "/api/v1/evidence-review-items/review_001/audit-events"
+  }
+}
+Frontend behavior:
+
+Render actions from permissions; do not infer permissions from the user's
+visible role.
+Use relatedFindings to render meaningful labels while retaining
+tempId for navigation.
+Do not automatically request source content after loading this response.
+3. Get a contradiction review item
+{
+  "id": "review_014",
+  "caseId": "case_001",
+  "category": "CONTRADICTION",
+  "extractionId": "ext_004",
+  "code": "CONFLICTING_ACCOUNT_OWNER",
+  "severity": "WARNING",
+  "message": "The same account is attributed to two different people.",
+  "claims": [
+    {
+      "claimId": "claim_101",
+      "subjectTempId": "file_004:e3",
+      "predicate": "OWNED_BY",
+      "objectTempId": "file_004:e1",
+      "confidence": 0.82,
+      "provenance": [
+        {
+          "fileId": "file_004",
+          "recordId": "profile_001"
+        }
+      ]
+    },
+    {
+      "claimId": "claim_102",
+      "subjectTempId": "file_004:e3",
+      "predicate": "OWNED_BY",
+      "objectTempId": "file_004:e2",
+      "confidence": 0.76,
+      "provenance": [
+        {
+          "fileId": "file_004",
+          "recordId": "message_042",
+          "startOffset": 16,
+          "endOffset": 28
+        }
+      ]
+    }
+  ],
+  "review": {
+    "status": "UNREVIEWED",
+    "version": 1
+  },
+  "permissions": {
+    "canViewMetadata": true,
+    "canRevealContent": true,
+    "canReview": true,
+    "canAddNote": true,
+    "canReopen": false
+  }
+}
+The frontend must display both claims side-by-side. It must not select a
+winning claim or modify either confidence score.
+
+4. Get evidence-set details
+GET /api/v1/entity-extractions/ext_001/evidence-sets/evidence_set_messages_001?limit=20
+Authorization: Bearer <access-token>
+{
+  "evidenceSetId": "evidence_set_messages_001",
+  "extractionId": "ext_001",
+  "fileId": "file_001",
+  "fileName": "telegram_export.txt",
+  "deviceId": "source_device_001",
+  "recordType": "MESSAGE",
+  "recordCount": 47,
+  "firstRecordId": "message_001",
+  "lastRecordId": "message_047",
+  "recordIds": null,
+  "supportedRelationships": [
+    {
+      "tempId": "file_001:r7",
+      "type": "MESSAGED",
+      "source": "file_001:e4",
+      "target": "file_001:e9",
+      "confidence": 0.99
+    }
+  ],
+  "records": [
+    {
+      "recordId": "message_001",
+      "observedAt": "2026-02-02T10:20:00Z",
+      "contentProtected": true,
+      "contentAvailable": true
+    },
+    {
+      "recordId": "message_002",
+      "observedAt": "2026-02-02T10:24:00Z",
+      "contentProtected": true,
+      "contentAvailable": true
+    }
+  ],
+  "pagination": {
+    "limit": 20,
+    "nextCursor": "message_020",
+    "hasMore": true
+  }
+}
+For an explicit, non-contiguous evidence set, recordIds may be populated:
+
+{
+  "evidenceSetId": "evidence_set_wallet_001",
+  "recordCount": 3,
+  "firstRecordId": null,
+  "lastRecordId": null,
+  "recordIds": [
+    "message_012",
+    "message_018",
+    "message_024"
+  ]
+}
+5. Get source-record metadata
+GET /api/v1/evidence-records/message_001
+Authorization: Bearer <access-token>
+{
+  "caseId": "case_001",
+  "fileId": "file_001",
+  "fileName": "telegram_export.txt",
+  "deviceId": "source_device_001",
+  "recordId": "message_001",
+  "recordType": "MESSAGE",
+  "observedAt": "2026-02-02T10:20:00Z",
+  "contentProtected": true,
+  "contentAvailable": true,
+  "content": null,
+  "contentHash": "sha256:8c50f4...d913",
+  "permissions": {
+    "canViewMetadata": true,
+    "canRevealContent": true
+  }
+}
+The metadata endpoint must not return protected content. The frontend must call
+the reveal endpoint only after an explicit investigator action.
+
+6. Reveal protected source content
+POST /api/v1/evidence-records/message_001/reveal
+Authorization: Bearer <access-token>
+Content-Type: application/json
+{
+  "reason": "Reviewing extraction warning review_001",
+  "reviewItemId": "review_001"
+}
+Successful response:
+
+HTTP/1.1 200 OK
+Cache-Control: no-store
+{
+  "recordId": "message_001",
+  "content": "Person A sent a benign example message.",
+  "contentHash": "sha256:8c50f4...d913",
+  "revealedAt": "2026-09-02T08:40:00Z",
+  "revealExpiresAt": "2026-09-02T08:45:00Z",
+  "auditEventId": "audit_8801"
+}
+Frontend behavior:
+
+Keep revealed content in memory only.
+Clear it when revealExpiresAt is reached.
+Clear it when the user closes the viewer or leaves the route.
+Do not retry a reveal request automatically.
+Do not include revealed content in telemetry or client error reports.
+7. Change review status
+POST /api/v1/evidence-review-items/review_001/actions
+Authorization: Bearer <access-token>
+Content-Type: application/json
+Idempotency-Key: <unique-action-key>
+{
+  "action": "MARK_REVIEWED",
+  "note": "Reviewed the source span; ambiguity remains and is retained.",
+  "expectedVersion": 1
+}
+Successful response:
+
+{
+  "id": "review_001",
+  "previousStatus": "IN_REVIEW",
+  "reviewStatus": "REVIEWED",
+  "reviewedBy": {
+    "userId": "user_102",
+    "displayName": "Investigator User"
+  },
+  "reviewedAt": "2026-09-02T08:44:00Z",
+  "version": 2,
+  "noteId": "note_501",
+  "auditEventId": "audit_8802"
+}
+Supported actions:
+
+Action	Typical transition
+START_REVIEW	UNREVIEWED → IN_REVIEW
+MARK_REVIEWED	IN_REVIEW → REVIEWED
+DEFER	UNREVIEWED or IN_REVIEW → DEFERRED
+REOPEN	REVIEWED or DEFERRED → IN_REVIEW
+The backend is authoritative for valid transitions.
+
+8. Version-conflict response
+If another investigator updates the item first:
+
+HTTP/1.1 409 Conflict
+Content-Type: application/problem+json
+{
+  "type": "https://api.example.test/problems/review-version-conflict",
+  "title": "Review item was updated",
+  "status": 409,
+  "detail": "The review item changed after it was loaded.",
+  "instance": "/api/v1/evidence-review-items/review_001/actions",
+  "code": "REVIEW_VERSION_CONFLICT",
+  "currentVersion": 3,
+  "currentStatus": "REVIEWED",
+  "updatedBy": {
+    "userId": "user_103",
+    "displayName": "Second Investigator"
+  },
+  "updatedAt": "2026-09-02T08:43:45Z",
+  "traceId": "trace_a91d"
+}
+The frontend should discard the optimistic status, reload the item, and inform
+the investigator that a newer review decision exists. It must not
+automatically resubmit the action.
+
+9. List notes
+GET /api/v1/evidence-review-items/review_001/notes?limit=20
+Authorization: Bearer <access-token>
+{
+  "reviewItemId": "review_001",
+  "items": [
+    {
+      "id": "note_501",
+      "text": "Reviewed the source span; ambiguity remains and is retained.",
+      "author": {
+        "userId": "user_102",
+        "displayName": "Investigator User"
+      },
+      "createdAt": "2026-09-02T08:44:00Z",
+      "modifiedAt": null,
+      "version": 1
+    }
+  ],
+  "pagination": {
+    "limit": 20,
+    "nextCursor": null,
+    "hasMore": false
+  }
+}
+10. Add a note
+POST /api/v1/evidence-review-items/review_001/notes
+Authorization: Bearer <access-token>
+Content-Type: application/json
+Idempotency-Key: <unique-note-key>
+{
+  "text": "Escalate if additional account-ownership evidence is extracted."
+}
+HTTP/1.1 201 Created
+{
+  "id": "note_502",
+  "reviewItemId": "review_001",
+  "text": "Escalate if additional account-ownership evidence is extracted.",
+  "author": {
+    "userId": "user_102",
+    "displayName": "Investigator User"
+  },
+  "createdAt": "2026-09-02T08:46:00Z",
+  "modifiedAt": null,
+  "version": 1,
+  "auditEventId": "audit_8803"
+}
+11. Get audit events
+GET /api/v1/evidence-review-items/review_001/audit-events?limit=50
+Authorization: Bearer <access-token>
+{
+  "reviewItemId": "review_001",
+  "items": [
+    {
+      "id": "audit_8801",
+      "action": "EVIDENCE_REVEALED",
+      "performedBy": {
+        "userId": "user_102",
+        "displayName": "Investigator User"
+      },
+      "occurredAt": "2026-09-02T08:40:00Z",
+      "previousStatus": null,
+      "newStatus": null,
+      "relatedRecordId": "message_001",
+      "relatedNoteId": null,
+      "session": {
+        "ipAddress": "192.0.2.25",
+        "workstationId": "WS-ANALYST-12"
+      }
+    },
+    {
+      "id": "audit_8802",
+      "action": "REVIEW_STATUS_CHANGED",
+      "performedBy": {
+        "userId": "user_102",
+        "displayName": "Investigator User"
+      },
+      "occurredAt": "2026-09-02T08:44:00Z",
+      "previousStatus": "IN_REVIEW",
+      "newStatus": "REVIEWED",
+      "relatedRecordId": null,
+      "relatedNoteId": "note_501",
+      "session": {
+        "ipAddress": "192.0.2.25",
+        "workstationId": "WS-ANALYST-12"
+      }
+    }
+  ],
+  "pagination": {
+    "limit": 50,
+    "nextCursor": null,
+    "hasMore": false
+  }
+}
+The API may omit session details when the caller is not authorized to see
+them.
+
+12. Standard API errors
+Use application/problem+json for errors:
+
+{
+  "type": "https://api.example.test/problems/evidence-access-denied",
+  "title": "Evidence access denied",
+  "status": 403,
+  "detail": "You do not have permission to reveal this evidence record.",
+  "instance": "/api/v1/evidence-records/message_001/reveal",
+  "code": "EVIDENCE_ACCESS_DENIED",
+  "traceId": "trace_7d21"
+}
+Expected status handling:
+
+Status	Frontend behavior
+400 Bad Request	Show a validation message without clearing loaded data.
+401 Unauthorized	Invoke the application's authentication flow.
+403 Forbidden	Keep protected content hidden and show an access-denied state.
+404 Not Found	Show that the item or source record is unavailable.
+409 Conflict	Reload current review state and explain the concurrent update.
+410 Gone	Clear expired revealed content and offer a new deliberate reveal action.
+422 Unprocessable Content	Show the backend's safe validation message.
+429 Too Many Requests	Respect Retry-After; do not retry reveal actions automatically.
+500 Internal Server Error	Preserve loaded metadata and offer a manual retry.
+Suggested query parameters
+GET /api/v1/cases/case_001/evidence-review-items
+  ?category=WARNING
+  &severity=WARNING
+  &reviewStatus=UNREVIEWED
+  &fileId=file_001
+  &limit=50
+  &cursor={cursor}
+Suggested review-action request
+{
+  "action": "MARK_REVIEWED",
+  "note": "Reviewed the supporting source span; ambiguity remains.",
+  "expectedVersion": 3
+}
+expectedVersion should be used for optimistic concurrency so two
+investigators cannot unknowingly overwrite each other's review state.
+
+Suggested response models
+type ReviewCategory = "WARNING" | "CONTRADICTION" | "EVIDENCE_SET";
+type ReviewStatus = "UNREVIEWED" | "IN_REVIEW" | "REVIEWED" | "DEFERRED";
+type ReviewSeverity = "INFO" | "WARNING" | "ERROR" | "CRITICAL";
+
+interface EvidenceProvenance {
+  fileId: string;
+  recordId?: string;
+  startOffset?: number;
+  endOffset?: number;
+  evidenceSetId?: string;
+  recordCount?: number;
+}
+
+interface EvidenceReviewItem {
+  id: string;
+  caseId: string;
+  extractionId: string;
+  category: ReviewCategory;
+  code?: string;
+  severity: ReviewSeverity;
+  message: string;
+  relatedTempIds: string[];
+  provenance: EvidenceProvenance[];
+  reviewStatus: ReviewStatus;
+  assignedTo?: string;
+  detectedAt: string;
+  reviewedAt?: string;
+  reviewedBy?: string;
+  version: number;
+}
+
+interface EvidenceRecord {
+  fileId: string;
+  deviceId?: string;
+  recordId: string;
+  recordType?: string;
+  observedAt?: string;
+  content?: string;
+  contentProtected: boolean;
+  revealExpiresAt?: string;
+}
+
+interface EvidenceSet {
+  evidenceSetId: string;
+  fileId: string;
+  recordType: string;
+  recordCount: number;
+  firstRecordId?: string;
+  lastRecordId?: string;
+  recordIds?: string[];
+}
+Suggested component structure
+EvidenceQualityReviewPage
+├── ReviewSummary
+├── ReviewTabs
+├── ReviewQueue
+│   ├── ReviewFilters
+│   └── ReviewQueueItem
+├── SourceRecordViewer
+│   ├── ProtectedContentGate
+│   └── EvidenceSpanHighlight
+├── ProvenancePanel
+├── WarningDetails
+├── ContradictionDetails
+├── EvidenceSetDetails
+├── ReviewActions
+├── InvestigatorNotes
+├── AuditTrail
+├── ReviewLoadingState
+└── ReviewErrorState
+State synchronization
+Selecting a queue item loads its source record and provenance.
+Selecting a related temporary ID opens the Extraction Result Explorer.
+Selecting an evidence-set record updates the source viewer.
+The active category, filters, and selected item should be reflected in the
+URL where practical.
+Updating review status should update both the queue item and summary counts.
+Navigating between records must not discard an unsaved note without warning.
+Security and privacy requirements
+Enforce case and evidence authorization through the backend.
+Do not persist evidence content in local storage, IndexedDB, or service-worker
+caches.
+Do not include sensitive content in URLs, analytics, error reports, or
+console logs.
+Sanitize and render extracted text as plain text.
+Prevent browser autocomplete in sensitive note or evidence fields when
+appropriate.
+Clear protected content after its access window expires.
+Audit every protected-content reveal.
+Respect server cache-control headers.
+Do not expose unauthorized cross-case references.
+Accessibility requirements
+Review tabs and queue items must be keyboard accessible.
+Evidence highlights must include a non-color indicator.
+Severity must use text and iconography, not color alone.
+Screen readers must announce selection and review-status changes.
+Focus must move predictably when the selected queue item changes.
+The protected-content reveal action must explain its effect.
+Non-functional requirements
+Virtualize large review queues.
+Cancel outdated detail requests when selection changes rapidly.
+Keep the queue usable while item details are loading.
+Preserve previously loaded metadata if protected-content retrieval fails.
+Use server-provided timestamps and display the active timezone.
+Prevent duplicate review actions while a request is in progress.
+Acceptance criteria
+
+The investigator can view warnings, contradictions, and evidence sets.
+
+Review items can be searched, filtered, sorted, and paginated.
+
+The sample AMBIGUOUS_PERSON warning renders correctly.
+
+Related temporary IDs link to the Extraction Result Explorer.
+
+Provenance displays the correct file and record IDs.
+
+Valid source offsets highlight the exact evidence span.
+
+Invalid offsets produce a visible warning rather than incorrect highlighting.
+
+Evidence-set ranges and explicit record lists are supported.
+
+Protected content is hidden until deliberately revealed.
+
+Protected-content reveals generate an audit event.
+
+The investigator can start, complete, defer, and reopen a review.
+
+Review actions preserve the original extraction result.
+
+Concurrent review updates are handled without silently overwriting state.
+
+Investigator notes can be added and viewed.
+
+Audit events are visible and read-only.
+
+Empty, loading, missing-record, forbidden, and API-error states are implemented.
+
+No evidence content is written to persistent browser storage or logs.
+
+Unit and end-to-end tests cover the principal review workflows.
+Suggested test cases
+Load the schema 1.1 sample and open AMBIGUOUS_PERSON.
+Verify related IDs file_001:e1 and file_001:e4.
+Open message_001 and highlight offsets 0 through 8.
+Return an out-of-range offset and verify the mismatch warning.
+Open evidence_set_messages_001 with 47 records.
+Open evidence_set_wallet_001 with three explicit record IDs.
+Render an extraction with no contradictions.
+Mark an item reviewed and verify the audit event.
+Simulate a version conflict from a second reviewer.
+Return 403 Forbidden from the reveal endpoint and verify content remains hidden.
+Let a reveal token expire and verify protected content is cleared.
+Fail the detail request and verify the queue remains usable.
+Out of scope
+Uploading or modifying source evidence
+Running or retrying extraction
+Editing the stored extraction JSON
+Changing extracted confidence values
+Resolving canonical entities
+Accepting or rejecting identity-match candidates
+Cross-device knowledge-graph visualization
+Community and bridge detection
+Deleting audit events
+Definition of done
+
+UI matches the approved Evidence and Quality Review mockup.
+
+API integration works with real or agreed mock responses.
+
+The schema 1.1 warning and evidence sets are included as test fixtures.
+
+Unit, integration, and end-to-end tests pass.
+
+Accessibility review passes.
+
+Protected-content behavior and audit logging are demonstrated.
+
+Concurrent-review behavior is tested.
+
+Large-queue performance is measured.
+
+Product owner approves the evidence-review workflow.
+
+
+
+
+
+Objective
+Build an investigator-facing Entity Resolution Review interface for
+reviewing potential identity matches across files and devices.
+
+The screen must explain why two extracted records may represent the same
+canonical entity, allow an authorized investigator to accept, reject, or defer
+the candidate, and preserve an auditable and reversible decision history.
+
+Reference design
+Image
+User story
+As an investigator, I want to compare a pair of extracted entities and inspect
+the evidence and scoring behind a proposed match so that I can make an
+informed, reversible resolution decision.
+
+Primary route
+/cases/:caseId/resolution
+The selected candidate should be addressable in the URL.
+
+/cases/case_001/resolution?candidateId=candidate_001
+Scope
+The page should combine:
+
+A resolution-candidate queue.
+Side-by-side source-entity comparison.
+Resolution confidence and weighted match rationale.
+Supporting source records and provenance.
+Canonical entity preview.
+Accept, reject, and defer actions.
+Merge and decision history.
+The frontend displays backend-generated resolution candidates and scores. It
+must not calculate the authoritative resolution score in the browser.
+
+Functional requirements
+1. Candidate queue
+Each candidate row should display:
+
+Candidate ID
+Left and right source/device identifiers
+Entity type
+Resolution confidence
+Confidence band
+Candidate status
+Assigned reviewer, when applicable
+Creation timestamp
+Supported candidate states:
+
+PENDING
+IN_REVIEW
+ACCEPTED
+REJECTED
+DEFERRED
+REOPENED
+REVERSED
+Provide filters for:
+
+Candidate status
+Entity type
+Device
+Source file
+Minimum and maximum confidence
+Confidence band
+Assigned reviewer
+Candidate creation date
+Warning or contradiction status
+Provide sorting by:
+
+Confidence
+Creation date
+Status
+Entity type
+Use cursor pagination or virtualized scrolling for large queues.
+
+2. Side-by-side source comparison
+Display Source A and Source B with the same field layout.
+
+For each source entity, show:
+
+Extraction-scoped tempId
+Entity type
+Display label
+Source file
+Device
+Case scope
+Confidence
+Extraction method
+First and last observed dates
+All extracted attributes
+Original values
+Normalized values
+Attribute-level confidence
+Provenance count
+Differences should be visually highlighted. Matching normalized values should
+be clearly marked.
+
+The UI must distinguish:
+
+Exact matches
+Normalized matches
+Fuzzy matches
+Conflicting values
+Missing values
+Do not use color as the only indicator.
+
+3. Resolution confidence
+Display:
+
+Overall match probability
+Confidence band
+Decision threshold
+Resolution model and version
+Candidate-generation timestamp
+Suggested confidence bands:
+
+Band	Range	Default UI treatment
+High	>= 0.85	Prioritize for review; never auto-accept in the UI.
+Medium	>= 0.60 and < 0.85	Show as requiring careful review.
+Low	< 0.60	Show as weak evidence; rejection may be likely but remains a human decision.
+Thresholds must come from the API or application configuration rather than
+being duplicated in components.
+
+4. Weighted match rationale
+Display the signals used by the backend, including:
+
+Signal name
+Left value
+Right value
+Similarity score
+Weight
+Weighted contribution
+Whether the signal supports or opposes the match
+Explanation
+Supporting evidence links
+Example signals:
+
+Exact normalized phone
+Username similarity
+Email match
+Shared device identifier
+Temporal overlap
+Shared group membership
+IP co-occurrence
+Conflicting ownership
+The sum displayed by the UI should use values returned by the backend. Avoid
+recalculating rounded values in a way that differs from the authoritative
+score.
+
+5. Supporting source records
+Provide separate tabs for Source A and Source B.
+
+Each record should show:
+
+File ID and filename
+Device ID
+Record ID
+Record type
+Observation timestamp
+Extracted attribute
+Normalized value
+Confidence
+Evidence offsets, when available
+Actions:
+
+Open record metadata
+Reveal protected content, when permitted
+Open the Extraction Result Explorer
+Copy a safe identifier
+Protected evidence should use the same deliberate-reveal workflow as the
+Evidence and Quality Review UI.
+
+6. Canonical entity preview
+Before acceptance, preview the canonical entity that would result.
+
+Show:
+
+Proposed canonical label
+Proposed primary identifier
+Entity type
+Combined attributes
+Earliest first-observed timestamp
+Latest last-observed timestamp
+Contributing source count
+Contributing device count
+Conflicting attributes
+Existing canonical entity ID, when merging into an existing entity
+Clearly label this section Preview until the backend confirms the decision.
+The frontend must not construct or persist the canonical entity independently.
+
+7. Resolution actions
+Provide:
+
+Start review
+Accept match
+Reject match
+Defer
+Reopen
+Accepting a match means the two records represent the same canonical entity.
+Rejecting means they represent different entities. Deferring records no
+identity conclusion.
+
+Before Accept match, show a confirmation containing:
+
+Source A and Source B labels
+Resulting canonical entity
+Number of records and relationships affected
+Reversibility notice
+Any conflicts that will remain attached to the canonical entity
+Before Reject match, allow an optional reason and make clear that the
+decision may suppress the same candidate from being regenerated.
+
+Every action must:
+
+Use an idempotency key.
+Include the candidate's expected version.
+Be authorized by the backend.
+Produce an audit event.
+Preserve the original extracted entities.
+8. Reversible decisions
+The UI must state that resolution decisions are reversible.
+
+For accepted matches, provide access to:
+
+Merge ID
+Resulting canonical entity ID
+Source entities included
+Decision author and time
+Decision rationale or note
+Graph changes produced by the merge
+Current merge status
+Reversal should be a separate, permission-controlled workflow. Do not place a
+one-click destructive-looking undo control in the candidate comparison panel.
+
+9. Merge and decision history
+Display:
+
+Candidate creation
+Assignment
+Review start
+Acceptance, rejection, deferment, or reopening
+Canonical entity creation or update
+Merge reversal
+Reviewer
+Timestamp
+Note
+Previous and new state
+History is read-only and must not be editable or deletable from the frontend.
+
+10. Warnings and contradictions
+Show warnings when:
+
+The same identifier is associated with different people.
+Strong attributes conflict.
+Evidence timestamps are inconsistent.
+The match relies mainly on weak or shared identifiers.
+One source record is unavailable.
+Accepting the match affects existing relationships.
+Contradictions must remain visible after a match is accepted. Acceptance must
+not imply that conflicting evidence was deleted.
+
+11. Loading and error states
+Implement:
+
+Candidate queue loading
+Candidate detail loading
+Empty queue
+No-filter-results state
+Missing source record
+Partial evidence
+Candidate already decided
+Concurrent update conflict
+Access denied
+Decision submission failure
+Canonical-preview failure
+API failure with retry
+A failed candidate-detail request must not clear the candidate queue.
+
+Proposed REST API
+Method	Endpoint	Purpose
+GET	/api/v1/cases/{caseId}/resolution-candidates	Load the candidate queue.
+GET	/api/v1/resolution-candidates/{candidateId}	Load comparison details and score rationale.
+GET	/api/v1/resolution-candidates/{candidateId}/source-records	Load supporting records for both sides.
+GET	/api/v1/resolution-candidates/{candidateId}/canonical-preview	Preview the canonical entity produced by acceptance.
+POST	/api/v1/resolution-candidates/{candidateId}/actions	Start, accept, reject, defer, or reopen review.
+GET	/api/v1/resolution-candidates/{candidateId}/history	Load candidate decision history.
+GET	/api/v1/canonical-entities/{entityId}	Load a canonical entity after acceptance.
+GET	/api/v1/canonical-entities/{entityId}/merge-history	Load canonical merge history.
+POST	/api/v1/entity-merges/{mergeId}/reversal-requests	Request reversal of an accepted merge.
+REST API request and response examples
+1. List resolution candidates
+GET /api/v1/cases/case_001/resolution-candidates?status=PENDING&minConfidence=0.60&limit=20
+Authorization: Bearer <access-token>
+{
+  "caseId": "case_001",
+  "summary": {
+    "total": 7,
+    "pending": 4,
+    "inReview": 1,
+    "accepted": 1,
+    "rejected": 1,
+    "deferred": 0,
+    "highConfidence": 2,
+    "mediumConfidence": 3,
+    "lowConfidence": 2
+  },
+  "thresholds": {
+    "high": 0.85,
+    "medium": 0.6
+  },
+  "items": [
+    {
+      "candidateId": "candidate_001",
+      "entityType": "ACCOUNT",
+      "sourceA": {
+        "tempId": "file_001:e4",
+        "displayLabel": "@sample_user",
+        "fileId": "file_001",
+        "deviceId": "source_device_001"
+      },
+      "sourceB": {
+        "tempId": "file_002:e7",
+        "displayLabel": "sample_user",
+        "fileId": "file_002",
+        "deviceId": "source_device_002"
+      },
+      "resolutionConfidence": 0.92,
+      "confidenceBand": "HIGH",
+      "status": "PENDING",
+      "assignedTo": null,
+      "hasWarnings": false,
+      "hasContradictions": false,
+      "createdAt": "2026-09-02T07:30:00Z",
+      "version": 1
+    }
+  ],
+  "pagination": {
+    "limit": 20,
+    "nextCursor": null,
+    "hasMore": false
+  }
+}
+Frontend behavior:
+
+Use candidateId as the queue key.
+Use API-provided thresholds to assign confidence styling.
+Preserve the current queue while fetching additional pages.
+Do not infer identity from a high confidence score.
+2. Get candidate details
+GET /api/v1/resolution-candidates/candidate_001
+Authorization: Bearer <access-token>
+{
+  "candidateId": "candidate_001",
+  "caseId": "case_001",
+  "entityType": "ACCOUNT",
+  "status": "PENDING",
+  "resolutionConfidence": 0.92,
+  "confidenceBand": "HIGH",
+  "decisionThresholds": {
+    "high": 0.85,
+    "medium": 0.6
+  },
+  "sourceA": {
+    "tempId": "file_001:e4",
+    "type": "ACCOUNT",
+    "displayLabel": "@sample_user",
+    "confidence": 0.98,
+    "extractionMethod": "PARSER",
+    "fileId": "file_001",
+    "fileName": "telegram_export.txt",
+    "deviceId": "source_device_001",
+    "firstObservedAt": "2026-02-02T10:20:00Z",
+    "lastObservedAt": "2026-02-18T21:45:00Z",
+    "attributes": [
+      {
+        "attributeType": "platform",
+        "value": "Telegram",
+        "normalizedValue": "telegram",
+        "confidence": 1.0
+      },
+      {
+        "attributeType": "username",
+        "value": "@sample_user",
+        "normalizedValue": "sample_user",
+        "confidence": 0.99
+      },
+      {
+        "attributeType": "phoneNumber",
+        "value": "+91 98765 43210",
+        "normalizedValue": "+919876543210",
+        "confidence": 0.99
+      }
+    ]
+  },
+  "sourceB": {
+    "tempId": "file_002:e7",
+    "type": "ACCOUNT",
+    "displayLabel": "sample_user",
+    "confidence": 0.91,
+    "extractionMethod": "PARSER",
+    "fileId": "file_002",
+    "fileName": "contacts.json",
+    "deviceId": "source_device_002",
+    "firstObservedAt": "2026-02-11T09:58:00Z",
+    "lastObservedAt": "2026-02-19T08:15:00Z",
+    "attributes": [
+      {
+        "attributeType": "platform",
+        "value": "Telegram",
+        "normalizedValue": "telegram",
+        "confidence": 1.0
+      },
+      {
+        "attributeType": "username",
+        "value": "sample_user",
+        "normalizedValue": "sample_user",
+        "confidence": 0.94
+      },
+      {
+        "attributeType": "phoneNumber",
+        "value": "+91-98765-43210",
+        "normalizedValue": "+919876543210",
+        "confidence": 0.97
+      }
+    ]
+  },
+  "signals": [
+    {
+      "signalType": "EXACT_NORMALIZED_PHONE",
+      "label": "Exact normalized phone",
+      "leftValue": "+919876543210",
+      "rightValue": "+919876543210",
+      "similarity": 1.0,
+      "weight": 0.55,
+      "contribution": 0.55,
+      "direction": "SUPPORTS",
+      "explanation": "Both records contain the same normalized phone number."
+    },
+    {
+      "signalType": "USERNAME_SIMILARITY",
+      "label": "Username similarity",
+      "leftValue": "sample_user",
+      "rightValue": "sample_user",
+      "similarity": 1.0,
+      "weight": 0.24,
+      "contribution": 0.24,
+      "direction": "SUPPORTS",
+      "explanation": "Normalized usernames are identical."
+    },
+    {
+      "signalType": "TEMPORAL_OVERLAP",
+      "label": "Temporal overlap",
+      "leftValue": "2026-02-02/2026-02-18",
+      "rightValue": "2026-02-11/2026-02-19",
+      "similarity": 0.65,
+      "weight": 0.2,
+      "contribution": 0.13,
+      "direction": "SUPPORTS",
+      "explanation": "The observation periods overlap."
+    }
+  ],
+  "resolutionEngine": {
+    "name": "entity-resolution-engine",
+    "version": "1.0",
+    "model": "probabilistic-record-linkage-v1"
+  },
+  "createdAt": "2026-09-02T07:30:00Z",
+  "version": 1,
+  "permissions": {
+    "canViewEvidence": true,
+    "canStartReview": true,
+    "canAccept": true,
+    "canReject": true,
+    "canDefer": true,
+    "canReopen": false,
+    "canRequestReversal": false
+  },
+  "links": {
+    "sourceRecords": "/api/v1/resolution-candidates/candidate_001/source-records",
+    "canonicalPreview": "/api/v1/resolution-candidates/candidate_001/canonical-preview",
+    "history": "/api/v1/resolution-candidates/candidate_001/history"
+  }
+}
+Frontend behavior:
+
+Use permissions to render available actions.
+Display signal values returned by the API without changing their precision.
+Treat resolutionConfidence as explanatory input, not a decision.
+Do not automatically request protected source content.
+3. Get supporting source records
+GET /api/v1/resolution-candidates/candidate_001/source-records?side=A&limit=20
+Authorization: Bearer <access-token>
+{
+  "candidateId": "candidate_001",
+  "side": "A",
+  "items": [
+    {
+      "fileId": "file_001",
+      "fileName": "telegram_export.txt",
+      "deviceId": "source_device_001",
+      "recordId": "profile_001",
+      "recordType": "PROFILE",
+      "observedAt": "2026-02-02T10:20:00Z",
+      "attributeType": "username",
+      "value": "@sample_user",
+      "normalizedValue": "sample_user",
+      "confidence": 0.99,
+      "contentProtected": true,
+      "startOffset": null,
+      "endOffset": null
+    }
+  ],
+  "pagination": {
+    "limit": 20,
+    "nextCursor": null,
+    "hasMore": false
+  }
+}
+Use the existing protected evidence-record endpoint for deliberate content
+reveal. Do not return protected content in this response.
+
+4. Get canonical entity preview
+GET /api/v1/resolution-candidates/candidate_001/canonical-preview
+Authorization: Bearer <access-token>
+{
+  "candidateId": "candidate_001",
+  "previewOnly": true,
+  "operation": "CREATE_CANONICAL_ENTITY",
+  "existingCanonicalEntityId": null,
+  "proposedEntity": {
+    "type": "ACCOUNT",
+    "displayLabel": "@sample_user",
+    "primaryIdentifier": {
+      "attributeType": "username",
+      "value": "sample_user"
+    },
+    "attributes": [
+      {
+        "attributeType": "platform",
+        "values": [
+          {
+            "value": "telegram",
+            "sourceCount": 2
+          }
+        ]
+      },
+      {
+        "attributeType": "username",
+        "values": [
+          {
+            "value": "sample_user",
+            "sourceCount": 2
+          }
+        ]
+      },
+      {
+        "attributeType": "phoneNumber",
+        "values": [
+          {
+            "value": "+919876543210",
+            "sourceCount": 2
+          }
+        ]
+      }
+    ],
+    "firstObservedAt": "2026-02-02T10:20:00Z",
+    "lastObservedAt": "2026-02-19T08:15:00Z",
+    "sourceCount": 2,
+    "deviceCount": 2
+  },
+  "conflicts": [],
+  "impact": {
+    "sourceEntitiesMerged": 2,
+    "relationshipsRepointed": 8,
+    "potentialDuplicateRelationships": 1
+  },
+  "generatedAt": "2026-09-02T08:00:00Z",
+  "candidateVersion": 1
+}
+The frontend should display the preview exactly as provisional data. Acceptance
+must use a separate action request.
+
+5. Start review
+POST /api/v1/resolution-candidates/candidate_001/actions
+Authorization: Bearer <access-token>
+Content-Type: application/json
+Idempotency-Key: <unique-action-key>
+{
+  "action": "START_REVIEW",
+  "expectedVersion": 1
+}
+{
+  "candidateId": "candidate_001",
+  "previousStatus": "PENDING",
+  "status": "IN_REVIEW",
+  "assignedTo": {
+    "userId": "user_102",
+    "displayName": "Investigator User"
+  },
+  "version": 2,
+  "auditEventId": "audit_9001",
+  "updatedAt": "2026-09-02T08:05:00Z"
+}
+6. Accept a match
+POST /api/v1/resolution-candidates/candidate_001/actions
+Authorization: Bearer <access-token>
+Content-Type: application/json
+Idempotency-Key: <unique-action-key>
+{
+  "action": "ACCEPT",
+  "expectedVersion": 2,
+  "reasonCode": "MATCH_CONFIRMED_BY_IDENTIFIERS",
+  "note": "Normalized phone and username match across both devices."
+}
+{
+  "candidateId": "candidate_001",
+  "previousStatus": "IN_REVIEW",
+  "status": "ACCEPTED",
+  "decision": {
+    "decidedBy": {
+      "userId": "user_102",
+      "displayName": "Investigator User"
+    },
+    "decidedAt": "2026-09-02T08:10:00Z",
+    "reasonCode": "MATCH_CONFIRMED_BY_IDENTIFIERS",
+    "note": "Normalized phone and username match across both devices."
+  },
+  "merge": {
+    "mergeId": "merge_001",
+    "status": "COMPLETED",
+    "canonicalEntityId": "entity_001",
+    "sourceTempIds": [
+      "file_001:e4",
+      "file_002:e7"
+    ],
+    "reversible": true
+  },
+  "version": 3,
+  "auditEventId": "audit_9002"
+}
+After success:
+
+Replace the provisional preview with the confirmed canonical entity.
+Disable candidate decision controls.
+Offer links to the canonical entity and merge history.
+Do not remove the original source entities from the comparison history.
+7. Reject a match
+{
+  "action": "REJECT",
+  "expectedVersion": 2,
+  "reasonCode": "CONFLICTING_OWNERSHIP_EVIDENCE",
+  "note": "Source records identify different account owners."
+}
+{
+  "candidateId": "candidate_001",
+  "previousStatus": "IN_REVIEW",
+  "status": "REJECTED",
+  "decision": {
+    "decidedBy": {
+      "userId": "user_102",
+      "displayName": "Investigator User"
+    },
+    "decidedAt": "2026-09-02T08:10:00Z",
+    "reasonCode": "CONFLICTING_OWNERSHIP_EVIDENCE",
+    "note": "Source records identify different account owners."
+  },
+  "suppression": {
+    "pairFingerprint": "pair_43ac...91fd",
+    "regenerateCandidate": false
+  },
+  "version": 3,
+  "auditEventId": "audit_9003"
+}
+8. Defer a candidate
+{
+  "action": "DEFER",
+  "expectedVersion": 2,
+  "reasonCode": "INSUFFICIENT_EVIDENCE",
+  "note": "Review again when Device 003 extraction is complete."
+}
+{
+  "candidateId": "candidate_001",
+  "previousStatus": "IN_REVIEW",
+  "status": "DEFERRED",
+  "deferredUntil": null,
+  "version": 3,
+  "auditEventId": "audit_9004",
+  "updatedAt": "2026-09-02T08:10:00Z"
+}
+9. Get candidate history
+GET /api/v1/resolution-candidates/candidate_001/history?limit=50
+Authorization: Bearer <access-token>
+{
+  "candidateId": "candidate_001",
+  "items": [
+    {
+      "eventId": "history_001",
+      "action": "CANDIDATE_CREATED",
+      "previousStatus": null,
+      "newStatus": "PENDING",
+      "performedBy": {
+        "type": "SYSTEM",
+        "displayName": "Entity Resolution Engine"
+      },
+      "occurredAt": "2026-09-02T07:30:00Z",
+      "note": null
+    },
+    {
+      "eventId": "history_002",
+      "action": "REVIEW_STARTED",
+      "previousStatus": "PENDING",
+      "newStatus": "IN_REVIEW",
+      "performedBy": {
+        "type": "USER",
+        "userId": "user_102",
+        "displayName": "Investigator User"
+      },
+      "occurredAt": "2026-09-02T08:05:00Z",
+      "note": null
+    }
+  ],
+  "pagination": {
+    "limit": 50,
+    "nextCursor": null,
+    "hasMore": false
+  }
+}
+10. Get canonical merge history
+GET /api/v1/canonical-entities/entity_001/merge-history
+Authorization: Bearer <access-token>
+{
+  "canonicalEntityId": "entity_001",
+  "items": [
+    {
+      "mergeId": "merge_001",
+      "candidateId": "candidate_001",
+      "status": "COMPLETED",
+      "sourceTempIds": [
+        "file_001:e4",
+        "file_002:e7"
+      ],
+      "decidedBy": {
+        "userId": "user_102",
+        "displayName": "Investigator User"
+      },
+      "decidedAt": "2026-09-02T08:10:00Z",
+      "reversible": true,
+      "reversedAt": null,
+      "reversedBy": null
+    }
+  ]
+}
+11. Request merge reversal
+Reversal should use a separate confirmation flow and endpoint.
+
+POST /api/v1/entity-merges/merge_001/reversal-requests
+Authorization: Bearer <access-token>
+Content-Type: application/json
+Idempotency-Key: <unique-reversal-key>
+{
+  "reasonCode": "INCORRECT_MATCH",
+  "reason": "New evidence demonstrates that the records belong to different people.",
+  "expectedCanonicalEntityVersion": 5
+}
+HTTP/1.1 202 Accepted
+{
+  "reversalRequestId": "reversal_001",
+  "mergeId": "merge_001",
+  "status": "PENDING",
+  "submittedBy": {
+    "userId": "user_102",
+    "displayName": "Investigator User"
+  },
+  "submittedAt": "2026-09-03T09:00:00Z",
+  "statusUrl": "/api/v1/merge-reversal-requests/reversal_001"
+}
+12. Concurrent-update conflict
+HTTP/1.1 409 Conflict
+Content-Type: application/problem+json
+{
+  "type": "https://api.example.test/problems/candidate-version-conflict",
+  "title": "Resolution candidate was updated",
+  "status": 409,
+  "detail": "The candidate changed after it was loaded.",
+  "instance": "/api/v1/resolution-candidates/candidate_001/actions",
+  "code": "CANDIDATE_VERSION_CONFLICT",
+  "currentVersion": 3,
+  "currentStatus": "ACCEPTED",
+  "updatedBy": {
+    "userId": "user_103",
+    "displayName": "Second Investigator"
+  },
+  "updatedAt": "2026-09-02T08:09:45Z",
+  "traceId": "trace_a91d"
+}
+The frontend must roll back optimistic state, reload the candidate, and explain
+that another investigator made a decision. It must not automatically resubmit
+the action.
+
+13. Standard API errors
+Use application/problem+json:
+
+{
+  "type": "https://api.example.test/problems/resolution-access-denied",
+  "title": "Resolution access denied",
+  "status": 403,
+  "detail": "You do not have permission to review this resolution candidate.",
+  "instance": "/api/v1/resolution-candidates/candidate_001",
+  "code": "RESOLUTION_ACCESS_DENIED",
+  "traceId": "trace_7d21"
+}
+Status	Frontend behavior
+400 Bad Request	Show validation errors without clearing loaded comparison data.
+401 Unauthorized	Invoke the application's authentication flow.
+403 Forbidden	Hide protected data and show an access-denied state.
+404 Not Found	Show that the candidate or source record is unavailable.
+409 Conflict	Reload the candidate and explain the concurrent decision.
+410 Gone	Show that the candidate was retired or superseded.
+422 Unprocessable Content	Show the backend's safe decision-validation message.
+429 Too Many Requests	Respect Retry-After; do not retry decision actions automatically.
+500 Internal Server Error	Preserve loaded comparison data and offer a manual retry.
+Suggested query parameters
+GET /api/v1/cases/case_001/resolution-candidates
+  ?status=PENDING
+  &entityType=ACCOUNT
+  &minConfidence=0.60
+  &maxConfidence=1.00
+  &deviceId=source_device_001
+  &limit=20
+  &cursor={cursor}
+Suggested TypeScript models
+type CandidateStatus =
+  | "PENDING"
+  | "IN_REVIEW"
+  | "ACCEPTED"
+  | "REJECTED"
+  | "DEFERRED"
+  | "REOPENED"
+  | "REVERSED";
+
+type SignalDirection = "SUPPORTS" | "OPPOSES" | "NEUTRAL";
+
+interface ResolutionSourceEntity {
+  tempId: string;
+  type: string;
+  displayLabel: string;
+  confidence: number;
+  extractionMethod: string;
+  fileId: string;
+  fileName: string;
+  deviceId: string;
+  firstObservedAt?: string;
+  lastObservedAt?: string;
+  attributes: Array<{
+    attributeType: string;
+    value: string | number | boolean;
+    normalizedValue?: string | number | boolean;
+    confidence: number;
+  }>;
+}
+
+interface ResolutionSignal {
+  signalType: string;
+  label: string;
+  leftValue?: string | number | boolean;
+  rightValue?: string | number | boolean;
+  similarity: number;
+  weight: number;
+  contribution: number;
+  direction: SignalDirection;
+  explanation: string;
+}
+
+interface ResolutionCandidate {
+  candidateId: string;
+  caseId: string;
+  entityType: string;
+  status: CandidateStatus;
+  resolutionConfidence: number;
+  confidenceBand: "HIGH" | "MEDIUM" | "LOW";
+  sourceA: ResolutionSourceEntity;
+  sourceB: ResolutionSourceEntity;
+  signals: ResolutionSignal[];
+  version: number;
+  permissions: {
+    canViewEvidence: boolean;
+    canStartReview: boolean;
+    canAccept: boolean;
+    canReject: boolean;
+    canDefer: boolean;
+    canReopen: boolean;
+    canRequestReversal: boolean;
+  };
+}
+Suggested component structure
+EntityResolutionReviewPage
+├── ResolutionSummary
+├── CandidateFilters
+├── CandidateQueue
+├── SourceComparison
+│   ├── SourceEntityPanel
+│   └── AttributeComparison
+├── ResolutionConfidence
+├── MatchRationale
+│   └── ResolutionSignalRow
+├── SourceRecords
+├── CanonicalEntityPreview
+├── ResolutionActions
+├── ConfirmationDialog
+├── MergeHistory
+├── CandidateLoadingState
+└── CandidateErrorState
+State synchronization
+Selecting a candidate updates the URL and comparison panels.
+Selecting an attribute focuses its corresponding match signal.
+Selecting a match signal should expose its supporting records when available.
+Candidate actions update the queue, details, summary counts, and history.
+Accepted candidates link to the resulting canonical entity.
+Filters and candidate selection should survive a page refresh where practical.
+Navigating away during a decision request should require confirmation.
+Security and privacy requirements
+Enforce case, source-record, and decision authorization through the backend.
+Do not persist evidence content in local storage or IndexedDB.
+Do not include protected values in URLs, telemetry, or client error reports.
+Render all extracted values as text, never as HTML.
+Audit all accept, reject, defer, reopen, and reversal requests.
+Use server-provided permissions for every action.
+Do not expose unauthorized cross-case candidate data.
+Clear protected evidence when its reveal period expires.
+Accessibility requirements
+Candidate queue and comparison panels must be keyboard accessible.
+Match and conflict indicators must use text/icons in addition to color.
+Screen readers must announce selection and decision-status changes.
+Confirmation dialogs must trap focus and return it to the originating action.
+Side-by-side comparison must have a usable narrow-screen fallback.
+Confidence charts must have equivalent text descriptions.
+Non-functional requirements
+Virtualize large candidate queues.
+Cancel outdated candidate-detail requests when selection changes.
+Prevent duplicate decision submissions.
+Preserve comparison data when history or preview requests fail.
+Use server timestamps and display the active timezone.
+Keep score calculations out of the frontend.
+Measure rendering performance with candidates containing many attributes and
+evidence records.
+Acceptance criteria
+
+The investigator can load, search, filter, sort, and paginate candidates.
+
+Source A and Source B are displayed with matching field layouts.
+
+Exact, normalized, fuzzy, conflicting, and missing values are distinguishable.
+
+Overall confidence, thresholds, and weighted signals match the API.
+
+Supporting source records can be opened when authorized.
+
+Canonical entity preview is clearly marked as provisional.
+
+The investigator can start, accept, reject, defer, and reopen a review when permitted.
+
+Accept and reject require confirmation and support an optional note.
+
+Every action uses an idempotency key and expected version.
+
+Concurrent decisions do not silently overwrite each other.
+
+Accepted matches link to the canonical entity and merge history.
+
+Original extracted entities remain visible in decision history.
+
+Reversal uses a separate permission-controlled request flow.
+
+Warnings and contradictions remain visible after acceptance.
+
+Loading, empty, partial, unavailable, forbidden, and API-error states are implemented.
+
+No authoritative match score is calculated in the browser.
+
+Unit and end-to-end tests cover the principal decision workflows.
+Suggested test cases
+Load candidate_001 with confidence 0.92.
+Verify identical normalized phone and username signals.
+Verify the three displayed contributions are 0.55, 0.24, and 0.13.
+Open Source A and Source B supporting records.
+Render conflicting attributes and ensure neither is hidden.
+Accept a candidate and navigate to entity_001.
+Reject a candidate and verify the pair-suppression result.
+Defer and later reopen a candidate.
+Simulate two reviewers deciding the same candidate and handle 409 Conflict.
+Return 403 Forbidden for source evidence and ensure it remains hidden.
+Fail canonical preview while preserving the comparison.
+Request merge reversal and verify pending status.
+Render a candidate with missing attributes on one side.
+Render an empty candidate queue.
+Out of scope
+Extracting entities in the browser
+Generating authoritative resolution scores
+Automatically accepting high-confidence matches
+Direct writes to Neo4j
+Editing original extracted values
+Deleting contradictions
+Community or bridge detection
+Full knowledge-graph visualization
+Completing a merge reversal synchronously in this UI
+Definition of done
+
+UI matches the approved Entity Resolution Review mockup.
+
+API integration works with real or agreed mock responses.
+
+Unit, integration, and end-to-end tests pass.
+
+Accessibility review passes.
+
+Concurrent-review behavior is demonstrated.
+
+Protected-evidence behavior is demonstrated.
+
+Accept, reject, defer, reopen, and reversal-request flows are demonstrated.
+
+Product owner approves the entity-resolution workflow.
+
+
+
+Frontend: Implement the Entity Extraction Jobs UI
+Objective
+Build an investigator-facing Entity Extraction Jobs page for starting,
+monitoring, filtering, retrying, and opening entity-and-relationship extraction
+jobs for a case.
+
+The page must support incremental processing. When a new file is added to a
+case, previously completed and unchanged files should be reused rather than
+extracted again.
+
+Reference design
+Image
+User story
+As an investigator, I want to start and monitor extraction jobs for case files
+so that I can see which files are complete, processing, skipped, failed, or
+require review and open their extraction results.
+
+Primary route
+/cases/:caseId/extractions
+Example:
+
+/cases/case_001/extractions
+Scope
+The page should provide:
+
+Case-level extraction summary.
+Searchable and filterable extraction-job table.
+Start-extraction workflow.
+Incremental file-selection preview.
+Processing progress.
+Retry and cancel actions.
+Navigation to completed results and warnings.
+This page manages extraction jobs. It does not display the complete extraction
+graph or perform entity resolution.
+
+Incremental extraction rule
+Before creating jobs, the backend should classify each eligible case file as:
+
+NEW: no extraction exists.
+CHANGED: the current file hash differs from the completed extraction.
+OUTDATED: schema, extractor, model, or definition version requires a new
+extraction.
+FAILED: the latest compatible attempt failed and may be retried.
+PROCESSING: a compatible extraction is already running.
+REUSABLE: an unchanged compatible completed result already exists.
+INELIGIBLE: no extractable content or unsupported file type.
+The frontend must display this classification before submission. It must not
+decide independently whether an existing result is reusable.
+
+Example:
+
+Day 1: File 1 → completed extraction
+Day 2: File 2 uploaded
+
+Day 2 extraction preview:
+File 1 → REUSABLE, skipped
+File 2 → NEW, queued
+Functional requirements
+1. Page header and summary
+Display:
+
+Case ID and case status
+Total case files
+Eligible files
+Completed extractions
+Processing extractions
+Failed extractions
+Extractions with warnings
+Files requiring extraction
+Primary action:
+
+Start extraction
+Disable the action when:
+
+The user lacks permission.
+No file requires extraction.
+The case is unavailable.
+2. Extraction-job table
+Each row should display:
+
+Extraction ID
+File name
+File ID
+Device ID
+Media type
+Schema version
+Extractor version
+Status
+Progress
+Entity count
+Relationship count
+Warning count
+Submitted time
+Completed time or duration
+Available actions
+Supported job statuses:
+
+PENDING
+PROCESSING
+COMPLETED
+COMPLETED_WITH_WARNINGS
+FAILED
+CANCELLING
+CANCELLED
+3. Search, filters, and sorting
+Provide:
+
+Search by filename, file ID, device ID, or extraction ID
+Status filter
+Media-type filter
+Device filter
+Schema-version filter
+Extractor-version filter
+Warning-only filter
+Submission-date range
+Provide sorting by:
+
+Submitted time
+Completed time
+Status
+Filename
+Entity count
+Warning count
+Store filters in URL query parameters where practical.
+
+4. Start-extraction preview
+Selecting Start extraction should first request an eligibility preview.
+
+The preview should show:
+
+Files that will be queued
+Files that will be skipped and reused
+Files already processing
+Ineligible files
+Reason for every classification
+Estimated job count
+Target schema and extractor versions
+Allow the investigator to select eligible files unless product requirements
+mandate processing every eligible file.
+
+Do not allow the user to force re-extraction from the standard flow. An
+explicit administrative reprocess workflow should be separate.
+
+5. Submission
+When the investigator confirms:
+
+Send one case-level request with the selected file IDs.
+Include an idempotency key.
+Disable duplicate submission while the request is pending.
+Display jobs returned by the backend immediately.
+Show which files were reused rather than queued.
+6. Progress monitoring
+For active jobs, display:
+
+Current processing stage
+Percentage, when available
+Processed and total record counts, when available
+Started time
+Elapsed duration
+Last update
+Suggested stages:
+
+QUEUED
+LOADING_CONTENT
+EXTRACTING_ENTITIES
+EXTRACTING_RELATIONSHIPS
+NORMALIZING
+VALIDATING
+PERSISTING
+Use bounded polling or the application's event mechanism. Respect a
+server-provided poll interval and stop polling when the page is inactive or
+the job reaches a terminal status.
+
+7. Row actions
+Show actions based on job status and API permissions:
+
+Status	Actions
+PENDING	View status, Cancel
+PROCESSING	View status, Cancel when permitted
+COMPLETED	View result, Download JSON
+COMPLETED_WITH_WARNINGS	View result, Review warnings, Download JSON
+FAILED	View error, Retry when permitted
+CANCELLING	View status
+CANCELLED	View status, Retry when permitted
+8. Retry behavior
+Retry should:
+
+Be available only for failed or cancelled jobs when the backend permits it.
+Require a reason when configured by policy.
+Use an idempotency key.
+Create a new extraction attempt.
+Preserve the original failed or cancelled attempt.
+Navigate or link to the new extraction ID.
+9. Cancel behavior
+Cancel should:
+
+Require confirmation.
+Be available only when the backend permits it.
+Explain that cancellation may not be immediate.
+Transition through CANCELLING when appropriate.
+Preserve completed partial audit information.
+Cancellation must not delete the source file or an older successful result.
+
+10. Result navigation
+Completed rows should link to:
+
+/cases/:caseId/extractions/:extractionId
+Rows with warnings should also link to:
+
+/cases/:caseId/evidence-review?extractionId=:extractionId
+11. Empty, loading, and error states
+Implement:
+
+Initial loading skeleton
+Case has no files
+No eligible files
+All files already have reusable results
+No-filter-results state
+Submission failure
+Job polling failure
+Partial summary failure
+Access denied
+Backend unavailable
+A failed refresh must not remove jobs already visible.
+
+Proposed REST API
+Method	Endpoint	Purpose
+GET	/api/v1/cases/{caseId}/entity-extractions	List jobs and case-level counts.
+GET	/api/v1/cases/{caseId}/entity-extractions/eligibility	Preview new, changed, reusable, processing, and ineligible files.
+POST	/api/v1/cases/{caseId}/entity-extractions	Start extraction for selected eligible files.
+GET	/api/v1/entity-extractions/{extractionId}	Get one job's status, progress, summary, and permissions.
+GET	/api/v1/entity-extractions/{extractionId}/result	Open or download the completed schema 1.1 result.
+POST	/api/v1/entity-extractions/{extractionId}/retry	Retry a failed or cancelled attempt.
+POST	/api/v1/entity-extractions/{extractionId}/cancel	Request cancellation.
+REST API request and response examples
+1. List extraction jobs
+GET /api/v1/cases/case_001/entity-extractions?limit=20&status=COMPLETED
+Authorization: Bearer <access-token>
+{
+  "caseId": "case_001",
+  "summary": {
+    "totalFiles": 24,
+    "eligibleFiles": 21,
+    "requiresExtraction": 3,
+    "completed": 18,
+    "processing": 2,
+    "failed": 1,
+    "withWarnings": 3
+  },
+  "items": [
+    {
+      "extractionId": "ext_001",
+      "fileId": "file_001",
+      "fileName": "telegram_export.txt",
+      "deviceId": "source_device_001",
+      "mediaType": "text/plain",
+      "status": "COMPLETED",
+      "schemaVersion": "1.1",
+      "extractorVersion": "1.0",
+      "submittedAt": "2026-09-01T02:29:30Z",
+      "startedAt": "2026-09-01T02:29:35Z",
+      "completedAt": "2026-09-01T02:30:00Z",
+      "summary": {
+        "entityCount": 9,
+        "relationshipCount": 10,
+        "warningCount": 1,
+        "contradictionCount": 0
+      },
+      "permissions": {
+        "canViewResult": true,
+        "canDownloadResult": true,
+        "canRetry": false,
+        "canCancel": false
+      }
+    }
+  ],
+  "pagination": {
+    "limit": 20,
+    "nextCursor": null,
+    "hasMore": false
+  }
+}
+Frontend behavior:
+
+Use extractionId as the stable row key.
+Use server summary counts for dashboard cards.
+Render actions from permissions.
+Do not infer missing counts as zero while a job is active.
+2. Preview extraction eligibility
+GET /api/v1/cases/case_001/entity-extractions/eligibility
+Authorization: Bearer <access-token>
+{
+  "caseId": "case_001",
+  "target": {
+    "schemaVersion": "1.1",
+    "extractorVersion": "1.0",
+    "model": "qwen3-14b",
+    "definitionVersion": "2026-09-03"
+  },
+  "summary": {
+    "totalFiles": 3,
+    "willQueue": 1,
+    "willReuse": 1,
+    "alreadyProcessing": 0,
+    "ineligible": 1
+  },
+  "files": [
+    {
+      "fileId": "file_001",
+      "fileName": "telegram_export.txt",
+      "deviceId": "source_device_001",
+      "mediaType": "text/plain",
+      "classification": "REUSABLE",
+      "reasonCode": "UNCHANGED_COMPATIBLE_RESULT",
+      "reason": "A completed compatible extraction already exists.",
+      "selectedByDefault": false,
+      "selectable": false,
+      "existingExtractionId": "ext_001",
+      "fileHash": "sha256:aa11...ff22"
+    },
+    {
+      "fileId": "file_002",
+      "fileName": "contacts.json",
+      "deviceId": "source_device_002",
+      "mediaType": "application/json",
+      "classification": "NEW",
+      "reasonCode": "NO_PREVIOUS_EXTRACTION",
+      "reason": "No extraction result exists for this file.",
+      "selectedByDefault": true,
+      "selectable": true,
+      "existingExtractionId": null,
+      "fileHash": "sha256:bb22...ee33"
+    },
+    {
+      "fileId": "file_003",
+      "fileName": "unsupported.bin",
+      "deviceId": "source_device_003",
+      "mediaType": "application/octet-stream",
+      "classification": "INELIGIBLE",
+      "reasonCode": "NO_EXTRACTABLE_CONTENT",
+      "reason": "The file does not contain supported extracted content.",
+      "selectedByDefault": false,
+      "selectable": false,
+      "existingExtractionId": null,
+      "fileHash": "sha256:cc33...dd44"
+    }
+  ],
+  "permissions": {
+    "canStartExtraction": true,
+    "canSelectFiles": true,
+    "canForceReprocess": false
+  },
+  "previewVersion": "eligibility_91af"
+}
+The frontend must submit previewVersion so the backend can reject a stale
+preview if files change before confirmation.
+
+3. Start extraction
+POST /api/v1/cases/case_001/entity-extractions
+Authorization: Bearer <access-token>
+Content-Type: application/json
+Idempotency-Key: <unique-request-key>
+{
+  "fileIds": [
+    "file_002"
+  ],
+  "previewVersion": "eligibility_91af"
+}
+HTTP/1.1 202 Accepted
+Location: /api/v1/cases/case_001/entity-extractions
+{
+  "caseId": "case_001",
+  "requestId": "extract_request_002",
+  "submittedAt": "2026-09-03T09:00:00Z",
+  "jobs": [
+    {
+      "extractionId": "ext_002",
+      "fileId": "file_002",
+      "fileName": "contacts.json",
+      "deviceId": "source_device_002",
+      "status": "PENDING",
+      "statusUrl": "/api/v1/entity-extractions/ext_002"
+    }
+  ],
+  "reused": [
+    {
+      "fileId": "file_001",
+      "extractionId": "ext_001",
+      "reasonCode": "UNCHANGED_COMPATIBLE_RESULT"
+    }
+  ],
+  "skipped": [
+    {
+      "fileId": "file_003",
+      "reasonCode": "NO_EXTRACTABLE_CONTENT"
+    }
+  ]
+}
+The frontend should add returned jobs to the table immediately and display
+reused/skipped results in the confirmation summary.
+
+4. Get pending job status
+{
+  "extractionId": "ext_002",
+  "caseId": "case_001",
+  "fileId": "file_002",
+  "fileName": "contacts.json",
+  "deviceId": "source_device_002",
+  "status": "PENDING",
+  "submittedAt": "2026-09-03T09:00:00Z",
+  "startedAt": null,
+  "completedAt": null,
+  "progress": {
+    "stage": "QUEUED",
+    "percent": 0,
+    "processedRecords": 0,
+    "totalRecords": null
+  },
+  "pollAfterSeconds": 5,
+  "permissions": {
+    "canViewResult": false,
+    "canDownloadResult": false,
+    "canRetry": false,
+    "canCancel": true
+  }
+}
+5. Get processing job status
+GET /api/v1/entity-extractions/ext_002
+Authorization: Bearer <access-token>
+{
+  "extractionId": "ext_002",
+  "caseId": "case_001",
+  "fileId": "file_002",
+  "fileName": "contacts.json",
+  "deviceId": "source_device_002",
+  "status": "PROCESSING",
+  "schemaVersion": "1.1",
+  "submittedAt": "2026-09-03T09:00:00Z",
+  "startedAt": "2026-09-03T09:00:02Z",
+  "completedAt": null,
+  "progress": {
+    "stage": "EXTRACTING_RELATIONSHIPS",
+    "percent": 70,
+    "processedRecords": 700,
+    "totalRecords": 1000
+  },
+  "pollAfterSeconds": 5,
+  "permissions": {
+    "canViewResult": false,
+    "canDownloadResult": false,
+    "canRetry": false,
+    "canCancel": true
+  }
+}
+Polling behavior:
+
+Respect pollAfterSeconds.
+Add random jitter to avoid synchronized clients.
+Stop when the job reaches a terminal status.
+Stop when the route is inactive.
+Pause or reduce polling when the browser tab is hidden.
+Do not clear existing row data after a transient polling failure.
+6. Get completed job status
+{
+  "extractionId": "ext_002",
+  "caseId": "case_001",
+  "fileId": "file_002",
+  "fileName": "contacts.json",
+  "deviceId": "source_device_002",
+  "status": "COMPLETED",
+  "schemaVersion": "1.1",
+  "submittedAt": "2026-09-03T09:00:00Z",
+  "startedAt": "2026-09-03T09:00:02Z",
+  "completedAt": "2026-09-03T09:00:28Z",
+  "progress": {
+    "stage": "COMPLETED",
+    "percent": 100,
+    "processedRecords": 1000,
+    "totalRecords": 1000
+  },
+  "summary": {
+    "entityCount": 5,
+    "relationshipCount": 4,
+    "warningCount": 0,
+    "contradictionCount": 0
+  },
+  "permissions": {
+    "canViewResult": true,
+    "canDownloadResult": true,
+    "canRetry": false,
+    "canCancel": false
+  },
+  "links": {
+    "result": "/api/v1/entity-extractions/ext_002/result"
+  }
+}
+7. Get failed job status
+{
+  "extractionId": "ext_002",
+  "caseId": "case_001",
+  "fileId": "file_002",
+  "fileName": "contacts.json",
+  "status": "FAILED",
+  "submittedAt": "2026-09-03T09:00:00Z",
+  "startedAt": "2026-09-03T09:00:02Z",
+  "completedAt": "2026-09-03T09:00:28Z",
+  "error": {
+    "code": "MODEL_TIMEOUT",
+    "message": "The extraction model did not complete within the configured time.",
+    "stage": "EXTRACTING_RELATIONSHIPS",
+    "retryable": true
+  },
+  "permissions": {
+    "canViewResult": false,
+    "canDownloadResult": false,
+    "canRetry": true,
+    "canCancel": false
+  }
+}
+Do not display an empty successful result. Show the failure summary and enable
+retry only when both error.retryable and permissions.canRetry are true.
+
+8. Retry a job
+POST /api/v1/entity-extractions/ext_002/retry
+Authorization: Bearer <access-token>
+Content-Type: application/json
+Idempotency-Key: <unique-retry-key>
+{
+  "reason": "Retry after transient model timeout"
+}
+HTTP/1.1 202 Accepted
+{
+  "extractionId": "ext_003",
+  "retryOfExtractionId": "ext_002",
+  "caseId": "case_001",
+  "fileId": "file_002",
+  "status": "PENDING",
+  "submittedAt": "2026-09-03T09:15:00Z",
+  "statusUrl": "/api/v1/entity-extractions/ext_003"
+}
+The UI should retain the failed row and add or navigate to the new attempt.
+
+9. Cancel a job
+POST /api/v1/entity-extractions/ext_002/cancel
+Authorization: Bearer <access-token>
+Content-Type: application/json
+Idempotency-Key: <unique-cancel-key>
+{
+  "reason": "Incorrect file selected"
+}
+HTTP/1.1 202 Accepted
+{
+  "extractionId": "ext_002",
+  "previousStatus": "PROCESSING",
+  "status": "CANCELLING",
+  "cancellationRequestedAt": "2026-09-03T09:05:00Z",
+  "requestedBy": {
+    "userId": "user_102",
+    "displayName": "Investigator User"
+  },
+  "pollAfterSeconds": 3
+}
+10. Stale eligibility preview
+If files change after the preview:
+
+HTTP/1.1 409 Conflict
+Content-Type: application/problem+json
+{
+  "type": "https://api.example.test/problems/stale-extraction-preview",
+  "title": "Extraction preview is stale",
+  "status": 409,
+  "detail": "Case files changed after the extraction preview was generated.",
+  "instance": "/api/v1/cases/case_001/entity-extractions",
+  "code": "STALE_EXTRACTION_PREVIEW",
+  "currentPreviewVersion": "eligibility_b102",
+  "traceId": "trace_21ca"
+}
+The frontend must close or refresh the confirmation state and request a new
+eligibility preview. It must not resubmit automatically.
+
+11. Standard API errors
+Use application/problem+json:
+
+{
+  "type": "https://api.example.test/problems/extraction-access-denied",
+  "title": "Extraction access denied",
+  "status": 403,
+  "detail": "You do not have permission to start extraction for this case.",
+  "instance": "/api/v1/cases/case_001/entity-extractions",
+  "code": "EXTRACTION_ACCESS_DENIED",
+  "traceId": "trace_7d21"
+}
+Status	Frontend behavior
+400 Bad Request	Show field-level validation errors.
+401 Unauthorized	Invoke the application's authentication flow.
+403 Forbidden	Disable protected actions and show access denied.
+404 Not Found	Show that the case, file, or extraction is unavailable.
+409 Conflict	Refresh eligibility or job state and explain the conflict.
+410 Gone	Show that the result expired or was removed under retention policy.
+422 Unprocessable Content	Show why no selected file can be extracted.
+429 Too Many Requests	Respect Retry-After and pause polling or submission.
+500 Internal Server Error	Preserve loaded jobs and offer a manual retry.
+Suggested query parameters
+GET /api/v1/cases/case_001/entity-extractions
+  ?status=COMPLETED,FAILED
+  &deviceId=source_device_001
+  &mediaType=text/plain
+  &hasWarnings=true
+  &submittedFrom=2026-09-01T00:00:00Z
+  &submittedTo=2026-09-03T23:59:59Z
+  &limit=20
+  &cursor={cursor}
+Suggested TypeScript models
+type ExtractionJobStatus =
+  | "PENDING"
+  | "PROCESSING"
+  | "COMPLETED"
+  | "COMPLETED_WITH_WARNINGS"
+  | "FAILED"
+  | "CANCELLING"
+  | "CANCELLED";
+
+type EligibilityClassification =
+  | "NEW"
+  | "CHANGED"
+  | "OUTDATED"
+  | "FAILED"
+  | "PROCESSING"
+  | "REUSABLE"
+  | "INELIGIBLE";
+
+interface ExtractionJob {
+  extractionId: string;
+  caseId: string;
+  fileId: string;
+  fileName: string;
+  deviceId: string;
+  mediaType: string;
+  status: ExtractionJobStatus;
+  schemaVersion?: string;
+  extractorVersion?: string;
+  submittedAt: string;
+  startedAt?: string | null;
+  completedAt?: string | null;
+  progress?: {
+    stage: string;
+    percent?: number;
+    processedRecords?: number;
+    totalRecords?: number | null;
+  };
+  summary?: {
+    entityCount: number;
+    relationshipCount: number;
+    warningCount: number;
+    contradictionCount: number;
+  };
+  error?: {
+    code: string;
+    message: string;
+    stage?: string;
+    retryable: boolean;
+  };
+  permissions: {
+    canViewResult: boolean;
+    canDownloadResult: boolean;
+    canRetry: boolean;
+    canCancel: boolean;
+  };
+}
+
+interface ExtractionEligibilityFile {
+  fileId: string;
+  fileName: string;
+  deviceId: string;
+  mediaType: string;
+  classification: EligibilityClassification;
+  reasonCode: string;
+  reason: string;
+  selectedByDefault: boolean;
+  selectable: boolean;
+  existingExtractionId?: string | null;
+  fileHash?: string;
+}
+Suggested component structure
+EntityExtractionJobsPage
+├── ExtractionJobSummary
+├── ExtractionJobToolbar
+├── ExtractionJobFilters
+├── ExtractionJobTable
+│   ├── ExtractionStatusBadge
+│   ├── ExtractionProgress
+│   └── ExtractionJobActions
+├── ExtractionEligibilityDialog
+│   ├── EligibilitySummary
+│   └── EligibilityFileList
+├── RetryExtractionDialog
+├── CancelExtractionDialog
+├── ExtractionJobsLoadingState
+└── ExtractionJobsErrorState
+State synchronization
+Store filters and sorting in the URL where practical.
+Add newly accepted jobs to the table immediately.
+Update only affected rows during polling.
+Recalculate summary cards from server responses rather than local guesses.
+Preserve selected rows when additional pages load.
+After a retry, keep the previous attempt visible and focus the new attempt.
+Refresh eligibility after a stale-preview conflict.
+Security and privacy requirements
+Enforce case and action authorization through the backend.
+Do not include extracted evidence content on this dashboard.
+Do not persist job results in local storage.
+Do not expose internal stack traces or model prompts in errors.
+Render filenames and backend messages as text, never HTML.
+Use server-provided permissions for actions.
+Use idempotency keys for start, retry, and cancel requests.
+Do not reveal jobs from unauthorized cases.
+Accessibility requirements
+Summary cards, filters, tables, menus, and dialogs must be keyboard accessible.
+Status and progress must use text in addition to color.
+Screen readers must announce job-status changes without excessive repetition.
+Confirmation dialogs must trap focus and return it to the originating action.
+Progress indicators must have accessible labels and values.
+Table actions must have row-specific accessible names.
+Non-functional requirements
+Virtualize or paginate large job lists.
+Poll only active jobs.
+Batch status refreshes when the backend supports it.
+Cancel outdated list and eligibility requests.
+Prevent duplicate submissions.
+Respect server polling and rate-limit instructions.
+Display server timestamps in the active user timezone while retaining UTC in
+details.
+Preserve loaded job data during transient failures.
+Acceptance criteria
+
+The investigator can view case-level extraction summary counts.
+
+Jobs can be searched, filtered, sorted, and paginated.
+
+Each job shows file, device, status, counts, timestamps, and valid actions.
+
+Start extraction first displays an eligibility preview.
+
+Reusable completed files are not selected for re-extraction.
+
+New, changed, outdated, failed, processing, reusable, and ineligible classifications are supported.
+
+Submission uses an idempotency key and preview version.
+
+Newly accepted jobs appear immediately.
+
+Active job progress updates without refreshing the page.
+
+Polling respects the backend interval and stops in terminal states.
+
+Completed jobs navigate to the Extraction Result Explorer.
+
+Warning-bearing jobs navigate to Evidence and Quality Review.
+
+Failed or cancelled jobs can be retried only when permitted.
+
+Retry creates a new attempt and preserves the previous attempt.
+
+Pending or processing jobs can be cancelled only when permitted.
+
+Stale eligibility previews are refreshed rather than submitted again.
+
+Loading, empty, reusable-only, forbidden, rate-limited, and API-error states are implemented.
+
+No evidence content is exposed on the dashboard.
+
+Unit and end-to-end tests cover the principal job workflows.
+Suggested test cases
+Load a case with completed, processing, warning, and failed jobs.
+Filter by device and status.
+Preview Day 2 extraction with File 1 reusable and File 2 new.
+Submit File 2 and verify File 1 is not re-extracted.
+Receive the same response after repeating an idempotent start request.
+Poll a job from PENDING through PROCESSING to COMPLETED.
+Stop polling after completion and when navigating away.
+Retry a failed job and preserve the original failed row.
+Cancel a processing job and handle CANCELLING followed by CANCELLED.
+Receive a stale-preview conflict and refresh eligibility.
+Receive 429 Too Many Requests and honor Retry-After.
+Receive 403 Forbidden and verify protected actions are unavailable.
+Render a case where every file has a reusable result.
+Fail one polling request and preserve current row data.
+Out of scope
+Uploading case files
+Rendering the complete extraction result
+Editing extraction JSON
+Viewing protected evidence
+Entity resolution
+Canonical entity creation
+Knowledge-graph visualization
+Community or bridge detection
+Administrative force-reprocessing
+Definition of done
+
+UI matches the approved Entity Extraction Jobs mockup.
+
+API integration works with real or agreed mock responses.
+
+Incremental extraction behavior is demonstrated.
+
+Unit, integration, and end-to-end tests pass.
+
+Accessibility review passes.
+
+Polling and large-list performance are measured.
+
+Retry, cancel, idempotency, and stale-preview behavior are demonstrated.
+
+Product owner approves the extraction-job workflow.
+
+
+
+Frontend: Build the Cross-Device Knowledge Graph
+Objective
+Build an interactive Cross-Device Knowledge Graph that allows investigators
+to explore canonical entities and relationships resolved across multiple files
+and devices.
+
+This screen must use resolved/canonical graph data. It must not treat temporary
+extraction IDs such as file_001:e1 as final knowledge-graph entity IDs.
+
+Reference design
+Image
+User story
+As an investigator, I want to explore entities and relationships discovered
+across different devices so that I can identify connected accounts, people,
+devices, groups, wallets, and bridge entities while retaining access to the
+evidence supporting every connection.
+
+Primary route
+/cases/:caseId/knowledge-graph
+Example:
+
+/cases/case_001/knowledge-graph
+Functional requirements
+1. Graph canvas
+Render canonical entities as nodes and resolved relationships as directed
+edges.
+
+Supported node types:
+
+PERSON
+ACCOUNT
+PHONE_NUMBER
+EMAIL_ADDRESS
+DEVICE
+IP_ADDRESS
+WALLET_ADDRESS
+GROUP
+Each node should display:
+
+Entity label
+Entity-type icon
+Entity-type color
+Canonical entity ID in the details panel
+Resolution confidence when applicable
+Number of source files and devices
+Warning or contradiction indicator
+Each edge should display:
+
+Relationship type
+Direction
+Confidence
+Active time range when available
+Warning or contradiction indicator
+2. Graph interactions
+The user must be able to:
+
+Pan and zoom
+Fit the graph to the viewport
+Select a node or edge
+Expand and collapse a node's neighborhood
+Search for entities
+Reset the graph
+Switch between one-hop and multi-hop views
+Open supporting evidence
+Navigate to an entity detail page
+Do not load the complete graph for a large case. Load an initial neighborhood
+and progressively request additional nodes.
+
+3. Filters
+Provide filters for:
+
+Device
+Source file
+Entity type
+Relationship type
+Minimum confidence
+Observed date range
+Community
+Warning or contradiction status
+Case visibility, when the investigator is authorized for cross-case data
+Filter changes should update the graph without reloading the page. Store
+selected filters in URL query parameters where practical.
+
+Example:
+
+?entityType=ACCOUNT,DEVICE&minConfidence=0.80&depth=2
+4. Node details drawer
+Selecting a node should show:
+
+Display label
+Entity type
+Canonical entity ID
+Resolution confidence
+First and last observed dates
+Associated devices and files
+Known attributes
+Relationship count
+Supporting-record count
+Warnings and contradictions
+Access classification
+Actions:
+
+Expand neighborhood
+View full entity
+View source records
+View merge history
+Add investigator note
+5. Edge details drawer
+Selecting an edge should show:
+
+Relationship type
+Source and target entities
+Direction
+Confidence
+Assertion type
+Extraction or resolution method
+First and last observed dates
+Valid-from and valid-to dates
+Relationship attributes
+Supporting-evidence count
+Source files and devices
+Access classification
+Actions:
+
+View evidence records
+Open source file
+Add investigator note
+Report an incorrect relationship
+Every edge must provide an evidence drill-down. The UI must not present an
+unexplained relationship as confirmed intelligence.
+
+6. Evidence drill-down
+Evidence records should show:
+
+Source file
+Device
+Record ID
+Evidence-set ID, when applicable
+Extracted text or metadata
+Highlighted source span
+Start and end offsets
+Extraction method
+Confidence
+Observation timestamp
+Sensitive content must not be displayed automatically. Show metadata first and
+require an explicit reveal action when applicable.
+
+7. Temporal playback
+Provide a timeline control that can:
+
+Select a date range
+Move to a specific time
+Play and pause
+Adjust playback speed
+Display nodes and relationships as they first appear
+Hide or visually deactivate expired relationships
+Reset to the complete time range
+Distinguish relationship validity from first and last observation. Represent
+missing or uncertain dates clearly.
+
+8. Communities and bridge entities
+Display analytics returned by the backend:
+
+Community membership and count
+Bridge entities
+Bridge score
+Centrality metrics, when available
+Allow the investigator to:
+
+Highlight one community
+Hide unrelated communities
+Focus on bridge entities
+Open evidence supporting bridge connections
+The frontend should display backend results. It must not calculate
+authoritative community or bridge scores in the browser.
+
+9. Access control
+Access control must be enforced by the backend. The frontend should display:
+
+Current case scope
+Whether cross-case information is available
+Access classification
+Restricted-node placeholders returned by the API
+Authorization errors
+The frontend must not rely on CSS or client-side filtering to protect
+cross-case data.
+
+For 403 Forbidden, display:
+
+You do not have permission to view this graph or some of its connected
+evidence.
+
+10. Loading and error states
+Implement:
+
+Initial loading skeleton
+Incremental neighborhood-loading indicator
+Empty graph state
+No-filter-results state
+API failure state
+Access-denied state
+Partial-data warning
+Graph-size warning
+Retry action
+A failed neighborhood request must not erase graph data already visible.
+
+Proposed API integration
+Method	Endpoint	Purpose
+GET	/api/v1/cases/{caseId}/graph?depth=1&limit=500&minConfidence=0.80	Load the initial graph.
+GET	/api/v1/cases/{caseId}/graph/neighborhood?entityId={entityId}&depth=1&limit=250	Expand a node neighborhood.
+GET	/api/v1/graph/entities/{entityId}	Get canonical node details.
+GET	/api/v1/canonical-entities/{entityId}/source-records	Get an entity's source records.
+GET	/api/v1/canonical-entities/{entityId}/merge-history	Get reversible merge history.
+GET	/api/v1/graph/relationships/{relationshipId}	Get edge details.
+GET	/api/v1/graph/relationships/{relationshipId}/evidence	Get evidence supporting an edge.
+GET	/api/v1/cases/{caseId}/graph/timeline?from={timestamp}&to={timestamp}	Load timeline events.
+GET	/api/v1/cases/{caseId}/graph/communities	Load detected communities.
+GET	/api/v1/cases/{caseId}/graph/bridges	Load bridge entities and metrics.
+Suggested frontend response model
+interface KnowledgeGraphResponse {
+  caseId: string;
+  generatedAt: string;
+  nodes: KnowledgeGraphNode[];
+  edges: KnowledgeGraphEdge[];
+  pagination?: {
+    nextCursor?: string;
+    hasMore: boolean;
+  };
+  summary: {
+    nodeCount: number;
+    edgeCount: number;
+    communityCount: number;
+    bridgeEntityCount: number;
+  };
+}
+
+interface KnowledgeGraphNode {
+  id: string;
+  type:
+    | PERSON
+    | ACCOUNT
+    | PHONE_NUMBER
+    | EMAIL_ADDRESS
+    | DEVICE
+    | IP_ADDRESS
+    | WALLET_ADDRESS
+    | GROUP;
+  label: string;
+  confidence?: number;
+  firstObservedAt?: string;
+  lastObservedAt?: string;
+  sourceCount: number;
+  deviceCount: number;
+  communityId?: string;
+  bridgeScore?: number;
+  hasWarnings: boolean;
+  hasContradictions: boolean;
+  access: {
+    caseId: string;
+    authorized: boolean;
+    classification?: string;
+  };
+}
+
+interface KnowledgeGraphEdge {
+  id: string;
+  type: string;
+  source: string;
+  target: string;
+  confidence: number;
+  assertionType: EXPLICIT | INFERRED | AGGREGATED;
+  directed: boolean;
+  attributes?: Record<string, string | number | boolean>;
+  temporal?: {
+    validFrom?: string | null;
+    validTo?: string | null;
+    firstObservedAt?: string;
+    lastObservedAt?: string;
+    precision?: SECOND | MINUTE | HOUR | DAY | MONTH | YEAR;
+  };
+  evidenceCount: number;
+  hasWarnings: boolean;
+  hasContradictions: boolean;
+}
+Suggested component structure
+KnowledgeGraphPage
+Γö£ΓöÇΓöÇ GraphToolbar
+Γö£ΓöÇΓöÇ GraphFilterPanel
+Γö£ΓöÇΓöÇ KnowledgeGraphCanvas
+Γöé   Γö£ΓöÇΓöÇ EntityNode
+Γöé   ΓööΓöÇΓöÇ RelationshipEdge
+Γö£ΓöÇΓöÇ EntityDetailsDrawer
+Γö£ΓöÇΓöÇ RelationshipDetailsDrawer
+Γö£ΓöÇΓöÇ EvidenceDrawer
+Γö£ΓöÇΓöÇ TimelinePlayback
+Γö£ΓöÇΓöÇ CommunityLegend
+Γö£ΓöÇΓöÇ GraphLoadingState
+ΓööΓöÇΓöÇ GraphErrorState
+A graph library such as Cytoscape.js is suitable because it supports directed
+graphs, layouts, interaction, neighborhood expansion, styling, and larger
+datasets.
+
+Non-functional requirements
+Maintain smooth interaction for at least 1,000 visible nodes.
+Do not attempt to render all 50,000 nodes simultaneously.
+Use progressive loading and neighborhood-focused views.
+Support keyboard navigation for filters and drawers.
+Do not use color as the only indication of entity type or status.
+Give all graph controls accessible names.
+Make drawer content accessible without using the graph canvas.
+Do not log evidence content to the browser console.
+Do not store sensitive graph responses in persistent browser storage.
+Cancel outdated API requests when filters change quickly.
+Acceptance criteria
+
+The investigator can open a case knowledge graph.
+
+Canonical nodes and evidence-backed edges are rendered.
+
+Node and edge directions match the API response.
+
+The investigator can search, filter, pan, and zoom.
+
+Selecting a node opens its details.
+
+Selecting an edge shows its confidence and evidence.
+
+Neighborhoods can be loaded progressively.
+
+Timeline playback changes the visible graph by observation time.
+
+Communities and bridge entities can be highlighted.
+
+Cross-case information is shown only when returned as authorized.
+
+Loading, empty, partial, forbidden, and error states are implemented.
+
+Extraction-scoped tempId values are never treated as canonical IDs.
+
+Unit tests cover transformation from API data to graph nodes and edges.
+
+End-to-end tests cover graph loading, filtering, selection, evidence drill-down, and authorization failure.
+Out of scope
+Entity extraction
+Entity-resolution algorithms
+Community-detection calculations
+Bridge-score calculations
+Backend authorization decisions
+Writing directly to Neo4j
+Reversing entity merges from this screen unless a dedicated backend workflow is approved
+Definition of done
+
+UI matches the approved mockup.
+
+API integration works with real or agreed mock responses.
+
+Unit and integration tests pass.
+
+Accessibility review passes.
+
+Large-graph performance is measured.
+
+Error and authorization states are demonstrated.
+
+Product owner approves the graph and evidence workflows.
+
+
+
+Frontend: Build the Extraction Result Explorer
+Objective
+Build an investigator-facing Extraction Result Explorer for reviewing the
+entities, relationships, evidence, warnings, and contradictions extracted from
+one source file.
+
+This screen displays extraction-scoped data from schema version 1.1. It must
+not present temporary entity IDs as canonical identities or imply that
+cross-device entity resolution has already occurred.
+
+Reference design
+Image
+User story
+As an investigator, I want to inspect the entities and relationships extracted
+from a file so that I can understand what was detected, assess confidence,
+trace findings to source evidence, and identify results requiring review.
+
+Primary route
+/cases/:caseId/extractions/:extractionId
+Example:
+
+/cases/case_001/extractions/ext_001
+Scope
+The page should provide three coordinated views:
+
+A searchable and filterable list of extracted entities and relationships.
+A file-scoped graph preview using temporary IDs.
+A details panel with attributes, temporal data, and provenance.
+The page should also provide access to the raw schema 1.1 JSON and any
+associated warnings, contradictions, and evidence sets.
+
+Functional requirements
+1. Page header and extraction summary
+Display:
+
+Case ID
+Extraction ID
+Source file name
+File ID
+Device ID
+Media type
+Extraction status
+Schema version
+Extractor name and version
+Model name
+Extraction timestamp
+Display summary counts for:
+
+Entities
+Relationships
+Warnings
+Contradictions
+Evidence sets
+Provide breadcrumbs:
+
+Case {caseId} / Extractions / {fileName}
+2. Entity list
+Display all objects from extractions[].entities.
+
+Each row should show:
+
+Display label
+Entity type
+Confidence
+Extraction method
+Warning or contradiction indicator
+Supported types:
+
+PERSON
+ACCOUNT
+PHONE_NUMBER
+EMAIL_ADDRESS
+DEVICE

@@ -38,7 +38,7 @@ function categoryLabel(cat?: string) {
     case 'fraud':           return 'text-[#000000] bg-[#E85002] border-[#E85002]';
     case 'kyc':             return 'text-white bg-blue-600 border-blue-500';
     case 'payment dispute': return 'text-black bg-amber-500 border-amber-500';
-    default:                return 'text-[#F9F9F9] bg-[#333333] border-[#646464]';
+    default:                return 'text-[#0D0F14] dark:text-[#F9F9F9] bg-[#F0F0F0] dark:bg-[#333333] border-[#E2E6F0] dark:border-[#646464]';
   }
 }
 
@@ -60,26 +60,26 @@ export default function CaseHeader({ caseData }: { caseData: Case }) {
   const currentPage = pageLabels[lastSeg] || null;
 
   return (
-    <div className="bg-[#111111] border border-[#333333] rounded-[2rem] overflow-hidden shadow-2xl">
+    <div className="bg-white dark:bg-[#111111] border border-[#E2E6F0] dark:border-[#333333] rounded-[2rem] overflow-hidden shadow-sm dark:shadow-2xl">
       {/* Breadcrumb bar */}
-      <div className="flex items-center justify-between px-8 py-3.5 border-b border-[#333333] bg-[#000000]">
-        <nav className="flex items-center gap-2 text-[12px] font-mono text-[#646464]">
-          <Link href="/" className="flex items-center gap-1.5 hover:text-[#F9F9F9] transition-colors">
+      <div className="flex items-center justify-between px-8 py-3.5 border-b border-[#E2E6F0] dark:border-[#333333] bg-[#F6F7FB] dark:bg-[#000000]">
+        <nav className="flex items-center gap-2 text-[12px] font-mono text-[#8B95AD] dark:text-[#646464]">
+          <Link href="/" className="flex items-center gap-1.5 hover:text-[#0D0F14] dark:hover:text-[#F9F9F9] transition-colors">
             <House size={13} weight="bold" className="text-[#E85002]" />
             <span>Home</span>
           </Link>
-          <CaretRight size={11} className="text-[#444444]" />
-          <Link href="/cases" className="hover:text-[#F9F9F9] transition-colors">
+          <CaretRight size={11} className="text-[#CDD2E1] dark:text-[#444444]" />
+          <Link href="/cases" className="hover:text-[#0D0F14] dark:hover:text-[#F9F9F9] transition-colors">
             Cases
           </Link>
-          <CaretRight size={11} className="text-[#444444]" />
+          <CaretRight size={11} className="text-[#CDD2E1] dark:text-[#444444]" />
           <Link href={`/cases/${caseData.id}`} className="hover:text-[#E85002] transition-colors font-bold text-[#E85002]">
             Case #{caseData.id}
           </Link>
           {currentPage && (
             <>
-              <CaretRight size={11} className="text-[#444444]" />
-              <span className="text-[#A7A7A7] font-bold">{currentPage}</span>
+              <CaretRight size={11} className="text-[#CDD2E1] dark:text-[#444444]" />
+              <span className="text-[#0D0F14] dark:text-[#A7A7A7] font-bold">{currentPage}</span>
             </>
           )}
         </nav>
@@ -110,28 +110,28 @@ export default function CaseHeader({ caseData }: { caseData: Case }) {
           </div>
 
           {/* Case title */}
-          <h1 className="text-xl sm:text-2xl font-black text-[#F9F9F9] leading-snug">
+          <h1 className="text-xl sm:text-2xl font-black text-[#0D0F14] dark:text-[#F9F9F9] leading-snug">
             {caseData.caseDescription}
           </h1>
 
           {/* Meta strip */}
-          <div className="flex flex-wrap items-center gap-5 text-[12px] text-[#A7A7A7]">
+          <div className="flex flex-wrap items-center gap-5 text-[12px] text-[#8B95AD] dark:text-[#A7A7A7]">
             <span className="flex items-center gap-2">
               <UserCircle size={15} weight="bold" className="text-[#E85002]" />
               <span>Lead:</span>
-              <span className="font-bold text-[#F9F9F9]">{caseData.assignedOfficers}</span>
+              <span className="font-bold text-[#0D0F14] dark:text-[#F9F9F9]">{caseData.assignedOfficers}</span>
             </span>
             <span className="flex items-center gap-2">
               <CalendarBlank size={15} weight="bold" className="text-[#E85002]" />
               <span>Opened:</span>
-              <span className="font-mono font-bold text-[#F9F9F9]">
+              <span className="font-mono font-bold text-[#0D0F14] dark:text-[#F9F9F9]">
                 {new Date(caseData.dateAdded).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
               </span>
             </span>
             <span className="flex items-center gap-2">
-              <Clock size={15} weight="bold" className="text-[#646464]" />
+              <Clock size={15} weight="bold" className="text-[#8B95AD] dark:text-[#646464]" />
               <span>Updated:</span>
-              <span className="font-mono font-bold text-[#F9F9F9]">
+              <span className="font-mono font-bold text-[#0D0F14] dark:text-[#F9F9F9]">
                 {new Date(caseData.dateModified).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
               </span>
             </span>

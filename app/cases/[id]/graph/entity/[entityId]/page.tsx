@@ -108,13 +108,13 @@ export default function EntityDetailsPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#FAF6F0] dark:bg-[#0D1424]">
-      <header className="sticky top-0 z-40 bg-white/80 dark:bg-[#162238]/80 backdrop-blur-xl border-b border-[#E8DCC8] dark:border-[#1F2A44]">
+    <div className="min-h-screen bg-[#F6F7FB] dark:bg-[#000000] text-[#0D0F14] dark:text-[#F9F9F9]">
+      <header className="sticky top-0 z-40 bg-white/90 dark:bg-[#111111]/90 backdrop-blur-xl border-b border-[#E2E6F0] dark:border-[#333333]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <Link
               href={`/cases/${caseId}/graph`}
-              className="flex items-center gap-2 text-[#5A667E] hover:text-[#1F2A44] dark:text-slate-400 dark:hover:text-white transition-colors"
+              className="flex items-center gap-2 text-[#555E6D] hover:text-[#0D0F14] dark:text-[#A7A7A7] dark:hover:text-[#F9F9F9] transition-colors"
             >
               <ArrowLeft size={20} />
               <span className="font-medium text-sm">Back to Graph</span>
@@ -124,7 +124,7 @@ export default function EntityDetailsPage() {
                 <ShieldCheck size={12} />
                 <span>{entity.riskLevel} RISK</span>
               </div>
-              <span className="text-[10px] font-mono text-[#8C733E] px-2 py-1 rounded bg-[#F3ECE1] dark:bg-[#1F2A44]">#{entityId}</span>
+              <span className="text-[10px] font-mono text-[#E85002] px-2.5 py-1 rounded-lg bg-[#E85002]/10 border border-[#E85002]/20 font-bold">#{entityId}</span>
             </div>
           </div>
         </div>
@@ -134,21 +134,21 @@ export default function EntityDetailsPage() {
         <div className="mb-8">
           <div className="flex items-start justify-between gap-4 mb-6">
             <div className="flex items-center gap-4">
-              <div className="h-16 w-16 rounded-2xl bg-[#1F2A44] text-[#C6A75E] border border-[#C6A75E]/30 flex items-center justify-center shadow-lg">
+              <div className="h-16 w-16 rounded-2xl bg-white dark:bg-[#111111] text-[#E85002] border border-[#E2E6F0] dark:border-[#333333] shadow-md flex items-center justify-center">
                 {typeIcons[entity.type] || <User size={28} weight="duotone" />}
               </div>
               <div>
                 <div className="flex items-center gap-3">
-                  <h1 className="text-2xl font-bold text-[#1F2A44] dark:text-[#FAF6F0]">{entity.name}</h1>
+                  <h1 className="text-2xl font-bold text-[#0D0F14] dark:text-[#F9F9F9]">{entity.name}</h1>
                   <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-mono font-bold uppercase ${riskColors[entity.riskLevel]}`}>
                     {entity.type}
                   </span>
                 </div>
-                <p className="text-[#5A667E] dark:text-slate-400 mt-1 text-sm">{entity.summary}</p>
+                <p className="text-[#555E6D] dark:text-[#A7A7A7] mt-1 text-sm">{entity.summary}</p>
                 {entity.aliases.length > 0 && (
                   <div className="mt-2 flex flex-wrap gap-1.5">
                     {entity.aliases.map((alias, i) => (
-                      <span key={i} className="px-2 py-0.5 rounded text-[10px] font-mono bg-[#F3ECE1] dark:bg-[#1F2A44] text-[#8C733E] dark:text-[#C6A75E] border border-[#E8DCC8] dark:border-[#1F2A44]">
+                      <span key={i} className="px-2 py-0.5 rounded text-[10px] font-mono bg-white dark:bg-[#161616] text-[#555E6D] dark:text-[#A7A7A7] border border-[#E2E6F0] dark:border-[#333333]">
                         AKA: {alias}
                       </span>
                     ))}
@@ -157,27 +157,27 @@ export default function EntityDetailsPage() {
               </div>
             </div>
             <div className="flex items-center gap-2 shrink-0">
-              <button className="p-2 rounded-xl bg-[#F3ECE1] dark:bg-[#1F2A44] text-[#5A667E] hover:text-[#1F2A44] dark:hover:text-[#E8DCC8] hover:bg-[#E8DCC8] dark:hover:bg-[#2A3A5E] transition-colors"><Copy size={16} /></button>
-              <button className="p-2 rounded-xl bg-[#F3ECE1] dark:bg-[#1F2A44] text-[#5A667E] hover:text-[#1F2A44] dark:hover:text-[#E8DCC8] hover:bg-[#E8DCC8] dark:hover:bg-[#2A3A5E] transition-colors"><PencilSimple size={16} /></button>
-              <button className="p-2 rounded-xl bg-[#F3ECE1] dark:bg-[#1F2A44] text-[#5A667E] hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors"><Trash size={16} /></button>
-              <button className="p-2 rounded-xl bg-[#F3ECE1] dark:bg-[#1F2A44] text-[#5A667E] hover:text-[#1F2A44] dark:hover:text-[#E8DCC8] hover:bg-[#E8DCC8] dark:hover:bg-[#2A3A5E] transition-colors"><DotsThreeVertical size={16} /></button>
+              <button className="p-2 rounded-xl bg-white dark:bg-[#161616] border border-[#E2E6F0] dark:border-[#333333] text-[#555E6D] hover:text-[#0D0F14] dark:text-[#A7A7A7] dark:hover:text-[#F9F9F9] hover:bg-[#F6F7FB] dark:hover:bg-[#222222] transition-colors"><Copy size={16} /></button>
+              <button className="p-2 rounded-xl bg-white dark:bg-[#161616] border border-[#E2E6F0] dark:border-[#333333] text-[#555E6D] hover:text-[#0D0F14] dark:text-[#A7A7A7] dark:hover:text-[#F9F9F9] hover:bg-[#F6F7FB] dark:hover:bg-[#222222] transition-colors"><PencilSimple size={16} /></button>
+              <button className="p-2 rounded-xl bg-white dark:bg-[#161616] border border-[#E2E6F0] dark:border-[#333333] text-[#555E6D] hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors"><Trash size={16} /></button>
+              <button className="p-2 rounded-xl bg-white dark:bg-[#161616] border border-[#E2E6F0] dark:border-[#333333] text-[#555E6D] hover:text-[#0D0F14] dark:text-[#A7A7A7] dark:hover:text-[#F9F9F9] hover:bg-[#F6F7FB] dark:hover:bg-[#222222] transition-colors"><DotsThreeVertical size={16} /></button>
             </div>
           </div>
 
-          <div className="flex gap-1 bg-white dark:bg-[#162238] rounded-xl p-1 border border-[#E8DCC8] dark:border-[#1F2A44] w-fit">
+          <div className="flex gap-1 bg-white dark:bg-[#111111] rounded-xl p-1 border border-[#E2E6F0] dark:border-[#333333] w-fit shadow-sm">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
                   activeTab === tab.id
-                    ? 'bg-[#1F2A44] text-[#C6A75E] shadow-sm'
-                    : 'text-[#5A667E] hover:text-[#1F2A44] hover:bg-[#F3ECE1] dark:hover:bg-[#1F2A44] dark:hover:text-[#E8DCC8]'
+                    ? 'bg-[#E85002] text-white shadow-sm'
+                    : 'text-[#555E6D] hover:text-[#0D0F14] hover:bg-[#F6F7FB] dark:text-[#A7A7A7] dark:hover:bg-[#1A1A1A] dark:hover:text-[#F9F9F9]'
                 }`}
               >
                 <tab.icon size={14} weight={activeTab === tab.id ? 'fill' : 'regular'} />
                 <span>{tab.label}</span>
-                <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold ${activeTab === tab.id ? 'bg-[#C6A75E] text-[#1F2A44]' : 'bg-[#F3ECE1] text-[#8C733E] dark:bg-[#1F2A44] dark:text-[#C6A75E]'}`}>
+                <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold ${activeTab === tab.id ? 'bg-black/20 text-white' : 'bg-[#F6F7FB] text-[#555E6D] dark:bg-[#222222] dark:text-[#A7A7A7]'}`}>
                   {tab.count}
                 </span>
               </button>
@@ -188,15 +188,15 @@ export default function EntityDetailsPage() {
         <div className="grid lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
             {activeTab === 'profile' && (
-              <section className="bg-white dark:bg-[#162238] rounded-2xl border border-[#E8DCC8] dark:border-[#1F2A44] p-6">
-                <h2 className="text-lg font-bold text-[#1F2A44] dark:text-[#FAF6F0] mb-5 flex items-center gap-2">
-                  <Tag size={18} weight="fill" className="text-[#C6A75E]" /> Attributes
+              <section className="bg-white dark:bg-[#111111] rounded-2xl border border-[#E2E6F0] dark:border-[#333333] p-6 shadow-sm">
+                <h2 className="text-lg font-bold text-[#0D0F14] dark:text-[#F9F9F9] mb-5 flex items-center gap-2">
+                  <Tag size={18} weight="fill" className="text-[#E85002]" /> Attributes
                 </h2>
                 <dl className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {Object.entries(entity.attributes).map(([key, value]) => (
                     <div key={key} className="space-y-1">
-                      <dt className="text-[10px] font-mono font-bold uppercase text-[#8C733E] tracking-wider">{key}</dt>
-                      <dd className="text-sm font-medium text-[#1F2A44] dark:text-[#FAF6F0] break-all">{value}</dd>
+                      <dt className="text-[10px] font-mono font-bold uppercase text-[#8B95AD] dark:text-[#A7A7A7] tracking-wider">{key}</dt>
+                      <dd className="text-sm font-medium text-[#0D0F14] dark:text-[#F9F9F9] break-all">{value}</dd>
                     </div>
                   ))}
                 </dl>
@@ -204,23 +204,23 @@ export default function EntityDetailsPage() {
             )}
 
             {activeTab === 'connections' && (
-              <section className="bg-white dark:bg-[#162238] rounded-2xl border border-[#E8DCC8] dark:border-[#1F2A44] p-6">
-                <h2 className="text-lg font-bold text-[#1F2A44] dark:text-[#FAF6F0] mb-5 flex items-center gap-2">
-                  <MagnifyingGlass size={18} weight="fill" className="text-[#C6A75E]" /> Network Connections
+              <section className="bg-white dark:bg-[#111111] rounded-2xl border border-[#E2E6F0] dark:border-[#333333] p-6 shadow-sm">
+                <h2 className="text-lg font-bold text-[#0D0F14] dark:text-[#F9F9F9] mb-5 flex items-center gap-2">
+                  <MagnifyingGlass size={18} weight="fill" className="text-[#E85002]" /> Network Connections
                 </h2>
                 <div className="space-y-3">
                   {entity.connections.map((conn) => (
                     <Link
                       key={conn.id}
                       href={`/cases/${caseId}/graph/entity/${conn.id}`}
-                      className="group flex items-center gap-4 p-4 rounded-xl bg-[#FAF6F0] dark:bg-[#0D1424] border border-[#E8DCC8] dark:border-[#1F2A44] hover:border-[#C6A75E] dark:hover:border-[#C6A75E] transition-all"
+                      className="group flex items-center gap-4 p-4 rounded-xl bg-[#F6F7FB] dark:bg-[#161616] border border-[#E2E6F0] dark:border-[#333333] hover:border-[#E85002] dark:hover:border-[#E85002] transition-all"
                     >
                       <div className={`h-10 w-10 rounded-xl flex items-center justify-center flex-shrink-0 ${conn.type === 'Person' ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' : 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400'}`}>
                         {typeIcons[conn.type] || <User size={18} weight="fill" />}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium text-[#1F2A44] dark:text-[#FAF6F0] truncate">{conn.name}</p>
-                        <p className="text-[11px] font-mono text-[#8C733E]">{conn.type} • {conn.relationship}</p>
+                        <p className="font-medium text-[#0D0F14] dark:text-[#F9F9F9] truncate">{conn.name}</p>
+                        <p className="text-[11px] font-mono text-[#8B95AD] dark:text-[#A7A7A7]">{conn.type} • {conn.relationship}</p>
                       </div>
                       <span className={`px-2 py-1 rounded-full text-[9px] font-mono font-bold ${conn.strength === 'Strong' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'}`}>
                         {conn.strength}
@@ -232,22 +232,22 @@ export default function EntityDetailsPage() {
             )}
 
             {activeTab === 'timeline' && (
-              <section className="bg-white dark:bg-[#162238] rounded-2xl border border-[#E8DCC8] dark:border-[#1F2A44] p-6">
-                <h2 className="text-lg font-bold text-[#1F2A44] dark:text-[#FAF6F0] mb-5 flex items-center gap-2">
-                  <Clock size={18} weight="fill" className="text-[#C6A75E]" /> Activity Timeline
+              <section className="bg-white dark:bg-[#111111] rounded-2xl border border-[#E2E6F0] dark:border-[#333333] p-6 shadow-sm">
+                <h2 className="text-lg font-bold text-[#0D0F14] dark:text-[#F9F9F9] mb-5 flex items-center gap-2">
+                  <Clock size={18} weight="fill" className="text-[#E85002]" /> Activity Timeline
                 </h2>
-                <div className="relative pl-6 border-l border-[#E8DCC8] dark:border-[#1F2A44]">
+                <div className="relative pl-6 border-l border-[#E2E6F0] dark:border-[#333333]">
                   {entity.timeline.map((item, i) => (
                     <div key={i} className="relative pb-8 last:pb-0">
-                      <div className="absolute left-[-6px] top-1 h-2.5 w-2.5 rounded-full bg-[#C6A75E] border-2 border-white dark:border-[#162238] z-10" />
+                      <div className="absolute left-[-6px] top-1 h-2.5 w-2.5 rounded-full bg-[#E85002] border-2 border-white dark:border-[#111111] z-10" />
                       <div className="pt-1">
                         <div className="flex items-center gap-2 mb-1">
-                          <span className="text-[10px] font-mono text-[#C6A75E] font-bold">{item.date}</span>
+                          <span className="text-[10px] font-mono text-[#E85002] font-bold">{item.date}</span>
                           <span className={`px-2 py-0.5 rounded text-[9px] font-mono font-bold uppercase ${item.type === 'transaction' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' : item.type === 'alert' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'}`}>
                             {item.type}
                           </span>
                         </div>
-                        <p className="text-sm text-[#3E4B65] dark:text-[#E8DCC8] ml-7">{item.event}</p>
+                        <p className="text-sm text-[#555E6D] dark:text-[#A7A7A7] ml-7">{item.event}</p>
                       </div>
                     </div>
                   ))}
@@ -256,25 +256,25 @@ export default function EntityDetailsPage() {
             )}
 
             {activeTab === 'documents' && (
-              <section className="bg-white dark:bg-[#162238] rounded-2xl border border-[#E8DCC8] dark:border-[#1F2A44] p-6">
-                <h2 className="text-lg font-bold text-[#1F2A44] dark:text-[#FAF6F0] mb-5 flex items-center gap-2">
-                  <FileText size={18} weight="fill" className="text-[#C6A75E]" /> Associated Documents
+              <section className="bg-white dark:bg-[#111111] rounded-2xl border border-[#E2E6F0] dark:border-[#333333] p-6 shadow-sm">
+                <h2 className="text-lg font-bold text-[#0D0F14] dark:text-[#F9F9F9] mb-5 flex items-center gap-2">
+                  <FileText size={18} weight="fill" className="text-[#E85002]" /> Associated Documents
                 </h2>
                 <div className="space-y-3">
                   {entity.documents.map((doc) => (
-                    <div key={doc.id} className="group flex items-center gap-4 p-4 rounded-xl bg-[#FAF6F0] dark:bg-[#0D1424] border border-[#E8DCC8] dark:border-[#1F2A44] hover:border-[#C6A75E] dark:hover:border-[#C6A75E] transition-all">
-                      <div className="h-12 w-10 rounded-lg bg-white dark:bg-[#162238] border border-[#E8DCC8] dark:border-[#1F2A44] flex items-center justify-center flex-shrink-0">
-                        <FileText size={20} className="text-[#C6A75E]" />
+                    <div key={doc.id} className="group flex items-center gap-4 p-4 rounded-xl bg-[#F6F7FB] dark:bg-[#161616] border border-[#E2E6F0] dark:border-[#333333] hover:border-[#E85002] dark:hover:border-[#E85002] transition-all">
+                      <div className="h-12 w-10 rounded-lg bg-white dark:bg-[#111111] border border-[#E2E6F0] dark:border-[#333333] flex items-center justify-center flex-shrink-0">
+                        <FileText size={20} className="text-[#E85002]" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium text-[#1F2A44] dark:text-[#FAF6F0] truncate">{doc.name}</p>
-                        <div className="flex items-center gap-3 mt-1 text-[11px] font-mono text-[#8C733E]">
-                          <span className="px-2 py-0.5 rounded bg-white dark:bg-[#162238] border border-[#E8DCC8] dark:border-[#1F2A44]">{doc.type}</span>
+                        <p className="font-medium text-[#0D0F14] dark:text-[#F9F9F9] truncate">{doc.name}</p>
+                        <div className="flex items-center gap-3 mt-1 text-[11px] font-mono text-[#8B95AD] dark:text-[#A7A7A7]">
+                          <span className="px-2 py-0.5 rounded bg-white dark:bg-[#111111] border border-[#E2E6F0] dark:border-[#333333]">{doc.type}</span>
                           <span>{doc.date}</span>
                           <span>{doc.pages} pages</span>
                         </div>
                       </div>
-                      <button className="p-2 rounded-lg text-[#5A667E] hover:text-[#C6A75E] hover:bg-white dark:hover:bg-[#1F2A44] transition-colors opacity-0 group-hover:opacity-100">
+                      <button className="p-2 rounded-lg text-[#8B95AD] hover:text-[#E85002] hover:bg-white dark:hover:bg-[#222222] transition-colors opacity-0 group-hover:opacity-100">
                         <ArrowSquareOut size={16} />
                       </button>
                     </div>
@@ -285,43 +285,43 @@ export default function EntityDetailsPage() {
           </div>
 
           <div className="space-y-6">
-            <div className="bg-white dark:bg-[#162238] rounded-2xl border border-[#E8DCC8] dark:border-[#1F2A44] p-6">
-              <h3 className="text-sm font-bold text-[#1F2A44] dark:text-[#FAF6F0] mb-4 flex items-center gap-2">
-                <ShieldCheck size={16} weight="fill" className="text-[#C6A75E]" /> Risk Assessment
+            <div className="bg-white dark:bg-[#111111] rounded-2xl border border-[#E2E6F0] dark:border-[#333333] p-6 shadow-sm">
+              <h3 className="text-sm font-bold text-[#0D0F14] dark:text-[#F9F9F9] mb-4 flex items-center gap-2">
+                <ShieldCheck size={16} weight="fill" className="text-[#E85002]" /> Risk Assessment
               </h3>
               <div className="space-y-4">
                 <div>
                   <div className="flex justify-between text-sm mb-1">
-                    <span className="text-[#5A667E] dark:text-slate-400">Overall Risk Score</span>
-                    <span className="font-bold text-[#1F2A44] dark:text-[#FAF6F0]">{entity.riskLevel === 'HIGH' ? '87/100' : entity.riskLevel === 'MEDIUM' ? '52/100' : '23/100'}</span>
+                    <span className="text-[#555E6D] dark:text-[#A7A7A7]">Overall Risk Score</span>
+                    <span className="font-bold text-[#0D0F14] dark:text-[#F9F9F9]">{entity.riskLevel === 'HIGH' ? '87/100' : entity.riskLevel === 'MEDIUM' ? '52/100' : '23/100'}</span>
                   </div>
-                  <div className="h-2 bg-[#E8DCC8] dark:bg-[#1F2A44] rounded-full overflow-hidden">
+                  <div className="h-2 bg-[#F6F7FB] dark:bg-[#222222] rounded-full overflow-hidden">
                     <div className={`h-full rounded-full transition-all duration-1000 ${entity.riskLevel === 'HIGH' ? 'bg-red-500' : entity.riskLevel === 'MEDIUM' ? 'bg-amber-500' : 'bg-emerald-500'}`} style={{ width: `${entity.riskLevel === 'HIGH' ? 87 : entity.riskLevel === 'MEDIUM' ? 52 : 23}%` }} />
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-3 text-center">
-                  <div className="p-3 rounded-xl bg-[#FAF6F0] dark:bg-[#0D1424]">
-                    <p className="text-2xl font-bold text-[#C6A75E]">{entity.connections.length}</p>
-                    <p className="text-[10px] font-mono text-[#8C733E]">Connections</p>
+                  <div className="p-3 rounded-xl bg-[#F6F7FB] dark:bg-[#161616] border border-[#E2E6F0] dark:border-[#333333]">
+                    <p className="text-2xl font-bold text-[#E85002]">{entity.connections.length}</p>
+                    <p className="text-[10px] font-mono text-[#8B95AD] dark:text-[#A7A7A7]">Connections</p>
                   </div>
-                  <div className="p-3 rounded-xl bg-[#FAF6F0] dark:bg-[#0D1424]">
-                    <p className="text-2xl font-bold text-[#C6A75E]">{entity.documents.length}</p>
-                    <p className="text-[10px] font-mono text-[#8C733E]">Documents</p>
+                  <div className="p-3 rounded-xl bg-[#F6F7FB] dark:bg-[#161616] border border-[#E2E6F0] dark:border-[#333333]">
+                    <p className="text-2xl font-bold text-[#E85002]">{entity.documents.length}</p>
+                    <p className="text-[10px] font-mono text-[#8B95AD] dark:text-[#A7A7A7]">Documents</p>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white dark:bg-[#162238] rounded-2xl border border-[#E8DCC8] dark:border-[#1F2A44] p-6">
-              <h3 className="text-sm font-bold text-[#1F2A44] dark:text-[#FAF6F0] mb-4 flex items-center gap-2">
-                <Hash size={16} weight="fill" className="text-[#C6A75E]" /> Metadata
+            <div className="bg-white dark:bg-[#111111] rounded-2xl border border-[#E2E6F0] dark:border-[#333333] p-6 shadow-sm">
+              <h3 className="text-sm font-bold text-[#0D0F14] dark:text-[#F9F9F9] mb-4 flex items-center gap-2">
+                <Hash size={16} weight="fill" className="text-[#E85002]" /> Metadata
               </h3>
               <dl className="space-y-3 text-sm">
-                <div className="flex justify-between"><dt className="text-[#5A667E] dark:text-slate-400">Entity ID</dt><dd className="font-mono font-bold text-[#1F2A44] dark:text-[#FAF6F0]">{entity.id}</dd></div>
-                <div className="flex justify-between"><dt className="text-[#5A667E] dark:text-slate-400">Type</dt><dd className="font-medium text-[#1F2A44] dark:text-[#FAF6F0]">{entity.type}</dd></div>
-                <div className="flex justify-between"><dt className="text-[#5A667E] dark:text-slate-400">Case</dt><dd className="font-mono font-bold text-[#1F2A44] dark:text-[#FAF6F0]">#{caseId}</dd></div>
-                <div className="flex justify-between"><dt className="text-[#5A667E] dark:text-slate-400">First Seen</dt><dd className="font-medium text-[#1F2A44] dark:text-[#FAF6F0]">2024-01-15</dd></div>
-                <div className="flex justify-between"><dt className="text-[#5A667E] dark:text-slate-400">Source</dt><dd className="font-medium text-[#1F2A44] dark:text-[#FAF6F0]">Extraction Job #JOB-0442</dd></div>
+                <div className="flex justify-between"><dt className="text-[#555E6D] dark:text-[#A7A7A7]">Entity ID</dt><dd className="font-mono font-bold text-[#0D0F14] dark:text-[#F9F9F9]">{entity.id}</dd></div>
+                <div className="flex justify-between"><dt className="text-[#555E6D] dark:text-[#A7A7A7]">Type</dt><dd className="font-medium text-[#0D0F14] dark:text-[#F9F9F9]">{entity.type}</dd></div>
+                <div className="flex justify-between"><dt className="text-[#555E6D] dark:text-[#A7A7A7]">Case</dt><dd className="font-mono font-bold text-[#0D0F14] dark:text-[#F9F9F9]">#{caseId}</dd></div>
+                <div className="flex justify-between"><dt className="text-[#555E6D] dark:text-[#A7A7A7]">First Seen</dt><dd className="font-medium text-[#0D0F14] dark:text-[#F9F9F9]">2024-01-15</dd></div>
+                <div className="flex justify-between"><dt className="text-[#555E6D] dark:text-[#A7A7A7]">Source</dt><dd className="font-medium text-[#0D0F14] dark:text-[#F9F9F9]">Extraction Job #JOB-0442</dd></div>
               </dl>
             </div>
           </div>

@@ -17,7 +17,7 @@ export default async function CaseLayout({ children, params }: CaseLayoutProps) 
   }
 
   return (
-    <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 space-y-6 text-[#F9F9F9]">
+    <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 space-y-6 text-[#0D0F14] dark:text-[#F9F9F9]">
       <CaseHeader caseData={caseData} />
       <div className="flex-1">
         {children}
