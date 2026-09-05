@@ -1,11 +1,13 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import FloatingIslandNav from './FloatingIslandNav';
 import HelpModal from '../help/HelpModal';
 import { BeamsBackground } from '../ui/beams-background';
 
 export default function AppLayoutShell({ children }: { children: React.ReactNode }) {
+  const [isNavOpen, setIsNavOpen] = useState(true);
+
   return (
     <BeamsBackground intensity="subtle">
     <div className="min-h-screen flex flex-col text-[#000000] dark:text-[#F9F9F9] transition-colors duration-200 selection:bg-[#E85002] selection:text-white">
@@ -24,9 +26,9 @@ export default function AppLayoutShell({ children }: { children: React.ReactNode
         style={{ background: 'radial-gradient(ellipse at top right, rgba(232,80,2,0.06) 0%, transparent 70%)' }}
       />
 
-      <FloatingIslandNav />
+      <FloatingIslandNav navOpen={isNavOpen} onToggleNav={setIsNavOpen} />
 
-      <main className="flex-1 w-full pt-24 sm:pt-28 pb-16 relative z-10">
+      <main className={`flex-1 w-full relative z-10 pb-16 transition-[padding] duration-500 ease-out ${isNavOpen ? 'pt-24 sm:pt-28' : 'pt-14 sm:pt-16'}`}>
         {children}
       </main>
 

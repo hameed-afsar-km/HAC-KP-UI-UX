@@ -19,9 +19,16 @@ import {
   X,
   House,
   CaretRight,
+  CaretUp,
+  CaretDown,
 } from '@phosphor-icons/react';
 
-export default function FloatingIslandNav() {
+interface FloatingIslandNavProps {
+  navOpen?: boolean;
+  onToggleNav?: (open: boolean) => void;
+}
+
+export default function FloatingIslandNav({ navOpen = true, onToggleNav }: FloatingIslandNavProps) {
   const pathname = usePathname();
   const { theme } = useTheme();
   const [scrolled, setScrolled] = useState(false);
@@ -82,7 +89,19 @@ export default function FloatingIslandNav() {
 
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 z-50 flex justify-center px-4 pt-4 pointer-events-none">
+      {/* Expand arrow — visible while the nav is collapsed */}
+      <button
+        onClick={() => onToggleNav?.(true)}
+        aria-label="Show navigation"
+        title="Show navigation"
+        className={`fixed top-1.5 left-1/2 -translate-x-1/2 z-[55] h-9 w-9 rounded-full border backdrop-blur-2xl shadow-lg flex items-center justify-center transition-all duration-500 ease-out cursor-pointer group
+          ${navOpen ? 'opacity-0 scale-50 pointer-events-none' : 'opacity-100 scale-100 pointer-events-auto'}
+          ${isDark ? 'bg-[#111111]/90 border-[#333333] text-[#A7A7A7] hover:text-[#F9F9F9] hover:border-[#E85002]' : 'bg-white/95 border-[#E2E6F0] text-[#8B95AD] hover:text-[#0D0F14] hover:border-[#E85002]'}`}
+      >
+        <CaretDown size={15} weight="bold" className="group-hover:text-[#E85002] transition-colors animate-bounce" />
+      </button>
+
+      <header className={`fixed top-0 left-0 right-0 z-50 flex justify-center px-4 pt-4 pointer-events-none transition-transform duration-500 ease-out ${navOpen ? 'translate-y-0' : '-translate-y-[110%]'}`}>
         <div className={`pointer-events-auto flex flex-col w-full max-w-7xl transition-all duration-300 ${scrolled ? 'translate-y-0' : 'translate-y-1'}`}>
 
           {/* Main Island Pill */}
@@ -226,6 +245,19 @@ export default function FloatingIslandNav() {
                 {isMobileOpen ? <X size={16} weight="bold" /> : <List size={16} weight="bold" />}
               </button>
             </div>
+          </div>
+
+          {/* Collapse handle — tucks the nav away */}
+          <div className="flex justify-center pt-2">
+            <button
+              onClick={() => onToggleNav?.(false)}
+              aria-label="Hide navigation"
+              title="Hide navigation"
+              className={`h-7 w-14 rounded-full border backdrop-blur-2xl shadow-md flex items-center justify-center transition-all duration-300 cursor-pointer group
+                ${isDark ? 'bg-[#111111]/90 border-[#333333] text-[#A7A7A7] hover:text-[#F9F9F9] hover:border-[#E85002]' : 'bg-white/95 border-[#E2E6F0] text-[#8B95AD] hover:text-[#0D0F14] hover:border-[#E85002]'}`}
+            >
+              <CaretUp size={13} weight="bold" className="group-hover:text-[#E85002] transition-colors" />
+            </button>
           </div>
 
           {/* Mobile Drawer */}
