@@ -15,29 +15,38 @@ import {
   ChartLineUp
 } from '@phosphor-icons/react/dist/ssr';
 
-function MetricNode({ label, value, sub, icon: Icon, accent }: any) {
-  return (
-    <div className="relative group overflow-hidden bg-white dark:bg-black border border-[#E2E6F0] dark:border-[#333333] rounded-2xl p-5 hover:border-[#E85002]/50 dark:hover:border-[#646464] transition-all duration-300">
+function MetricNode({ label, value, sub, icon: Icon, accent, href }: any) {
+  const inner = (
+    <>
       <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${accent ? 'from-[#E85002]/20' : 'from-[#E2E6F0]/40 dark:from-[#333333]/40'} to-transparent rounded-bl-full opacity-50 -z-0 group-hover:scale-110 transition-transform duration-500`} />
       
       <div className="relative z-10 flex flex-col h-full justify-between gap-4">
         <div className="flex items-center justify-between">
-          <div className={`p-2.5 rounded-xl bg-[#F6F7FB] dark:bg-[#111111] border border-[#E2E6F0] dark:border-[#333333] ${accent ? 'text-[#E85002] border-[#E85002]/30' : 'text-[#0D0F14] dark:text-[#F9F9F9]'}`}>
+          <div className={`p-2.5 rounded-xl bg-[#F6F7FB] dark:bg-[#111111] border border-[#E2E6F0] dark:border-[#333333] ${accent ? 'text-[#E85002] border-[#E85002]/30' : 'text-[#0D0F14] dark:text-[#F9F9F9]'} group-hover:bg-[#E85002] group-hover:border-[#E85002] group-hover:text-white group-hover:scale-110 group-hover:rotate-3 transition-all duration-300`}>
             <Icon size={18} weight={accent ? 'bold' : 'regular'} />
           </div>
-          <ArrowUpRight size={14} className="text-[#8B95AD] dark:text-[#646464] group-hover:text-[#0D0F14] dark:group-hover:text-[#F9F9F9] transition-colors" />
+          <ArrowUpRight size={14} className="text-[#8B95AD] dark:text-[#646464] group-hover:text-[#0D0F14] dark:group-hover:text-[#F9F9F9] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
         </div>
         
         <div>
           <div className="flex items-baseline gap-2 mb-1">
-            <span className={`text-4xl font-extrabold tracking-tighter ${accent ? 'text-[#E85002]' : 'text-[#0D0F14] dark:text-[#F9F9F9]'}`}>{value}</span>
+            <span className={`text-4xl font-extrabold tracking-tighter ${accent ? 'text-[#E85002]' : 'text-[#0D0F14] dark:text-[#F9F9F9]'} group-hover:text-[#E85002] group-hover:scale-110 origin-left transition-all duration-300 inline-block`}>{value}</span>
             {accent && <ChartLineUp size={14} weight="bold" className="text-[#E85002]" />}
           </div>
           <p className="text-[11px] font-mono font-bold text-[#8B95AD] dark:text-[#A7A7A7] uppercase tracking-widest">{label}</p>
           <p className="text-[12px] text-[#8B95AD] dark:text-[#646464] mt-1 line-clamp-1">{sub}</p>
         </div>
       </div>
-    </div>
+    </>
+  );
+
+  return (
+    <Link
+      href={href}
+      className="relative group overflow-hidden bg-white dark:bg-black border border-[#E2E6F0] dark:border-[#333333] rounded-2xl p-5 hover:border-[#E85002]/50 dark:hover:border-[#646464] hover:-translate-y-1.5 hover:shadow-[0_12px_30px_-12px_rgba(232,80,2,0.4)] dark:hover:shadow-[0_12px_30px_-12px_rgba(232,80,2,0.55)] transition-all duration-300"
+    >
+      {inner}
+    </Link>
   );
 }
 
@@ -69,7 +78,7 @@ export default async function DashboardPage() {
         <div className="space-y-2">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#F6F7FB] dark:bg-[#111111] border border-[#E2E6F0] dark:border-[#333333] text-[10px] font-mono font-bold text-[#8B95AD] dark:text-[#A7A7A7] uppercase tracking-widest">
             <span className="h-1.5 w-1.5 rounded-full bg-[#E85002] animate-pulse" />
-            System Online • Hameed Afsar KM
+            System Backend Online • Hameed Afsar KM
           </div>
           <h1 className="text-4xl sm:text-5xl font-black text-[#0D0F14] dark:text-[#F9F9F9] tracking-tight" style={{ fontFamily: 'var(--font-space-grotesk), sans-serif' }}>
             Command Center
@@ -97,10 +106,10 @@ export default async function DashboardPage() {
           
           {/* Stat Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <MetricNode label="Active Cases"         value={active}  sub={`${total} total on record`}        icon={Briefcase} />
-            <MetricNode label="Awaiting Decision"    value={3}       sub="Possible matches to review"        icon={Fingerprint} accent />
-            <MetricNode label="Analysis Running"     value={1}       sub="Processing now"                    icon={Cpu} />
-            <MetricNode label="Known Entity Types"   value={33}      sub="People, devices, accounts & more"  icon={TreeStructure} />
+            <MetricNode label="Active Cases"         value={active}  sub={`${total} total on record`}        icon={Briefcase}    href="/cases" />
+            <MetricNode label="Awaiting Decision"    value={3}       sub="Possible matches to review"        icon={Fingerprint}  accent href="/cases/1001/resolution-review" />
+            <MetricNode label="Analysis Running"     value={1}       sub="Processing now"                    icon={Cpu}         href="/cases/1001/jobs" />
+            <MetricNode label="Known Entity Types"   value={33}      sub="People, devices, accounts & more"  icon={TreeStructure} href="/ontology/entities" />
           </div>
 
           {/* Activity Log */}

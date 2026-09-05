@@ -472,12 +472,20 @@ export default function InvestigationCanvas({
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTypeFilter, setSelectedTypeFilter] = useState<string>('ALL');
   const [isPhysicsRunning, setIsPhysicsRunning] = useState(false);
+  const [isReconstructing, setIsReconstructing] = useState(false);
 
   const transformRef = useRef({ x: 0, y: 0, k: 1 });
   const isDraggingCanvasRef = useRef(false);
   const dragStartRef = useRef({ x: 0, y: 0 });
   const draggedNodeRef = useRef<SimulatedNode | null>(null);
   const hoveredNodeRef = useRef<SimulatedNode | null>(null);
+  // Progressive graph reconstruction animation state (1 = identity reveal .. nodes.length = fully built)
+  const revealRef = useRef<number>(Number.POSITIVE_INFINITY);
+  const edgeRevealProgressRef = useRef<Record<string, number>>({});
+  const isReconstructingRef = useRef(false);
+  // Target layout for smooth node rearrangement when nodes are enabled/disabled
+  const targetNodesRef = useRef<SimulatedNode[] | null>(null);
+  const isAnimatingLayoutRef = useRef(false);
 
   // Synchronize canvas buffer resolution with actual parent container
   useEffect(() => {
@@ -513,9 +521,34 @@ export default function InvestigationCanvas({
     const w = dimensions.width || canvas?.width || 1000;
     const h = dimensions.height || canvas?.height || 700;
 
-    const newSimNodes = calculateConcentricLayout(data.nodes, data.edges, w, h);
-    setNodes(newSimNodes);
+    setNodes((currentNodes) => {
+      // Compute target layout
+      const target = calculateConcentricLayout(data.nodes, data.edges, w, h);
+
+      // Preserve current state of nodes still present; animate toward target positions
+      const currentMap = new Map(currentNodes.map((n) => [n.id, n]));
+      const animated = target.map((tn) => {
+        const cur = currentMap.get(tn.id);
+        if (!cur) return tn;
+        return {
+          ...tn,
+          x: cur.x,
+          y: cur.y,
+          vx: 0,
+          vy: 0,
+        };
+      });
+
+      targetNodesRef.current = target;
+      isAnimatingLayoutRef.current = true;
+      return animated;
+    });
+
     setEdges(data.edges);
+    revealRef.current = Number.POSITIVE_INFINITY;
+    isReconstructingRef.current = false;
+    setIsReconstructing(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data, dimensions]);
 
   const handleResetLayout = () => {
@@ -526,6 +559,20 @@ export default function InvestigationCanvas({
     const newSimNodes = calculateConcentricLayout(data.nodes, data.edges, w, h);
     setNodes(newSimNodes);
     setIsPhysicsRunning(false);
+    revealRef.current = Number.POSITIVE_INFINITY;
+    edgeRevealProgressRef.current = {};
+    isReconstructingRef.current = false;
+    setIsReconstructing(false);
+  };
+
+  const startReconstruction = () => {
+    setIsPhysicsRunning(false);
+    // Reset camera and start the reveal from the identity/center node only
+    transformRef.current = { x: 0, y: 0, k: 1 };
+    revealRef.current = 1;
+    edgeRevealProgressRef.current = {};
+    isReconstructingRef.current = true;
+    setIsReconstructing(true);
   };
 
   useEffect(() => {
@@ -566,7 +613,7 @@ export default function InvestigationCanvas({
       const r2 = Math.max(250, Math.min(320, minDim * 0.42));
 
       ctx.save();
-      ctx.strokeStyle = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)';
+      ctx.strokeStyle = isDark ? 'rgba(255, 255, 255, 0.14)' : 'rgba(13, 15, 20, 0.12)';
       ctx.lineWidth = 1.2;
       ctx.setLineDash([4, 6]);
 
@@ -587,8 +634,8 @@ export default function InvestigationCanvas({
         ctx.stroke();
 
         ctx.save();
-        ctx.font = '8px monospace';
-        ctx.fillStyle = isDark ? 'rgba(255, 255, 255, 0.25)' : 'rgba(0, 0, 0, 0.25)';
+        ctx.font = 'bold 8.5px monospace';
+        ctx.fillStyle = isDark ? 'rgba(255, 255, 255, 0.45)' : 'rgba(13, 15, 20, 0.45)';
         ctx.textAlign = 'left';
         ctx.textBaseline = 'bottom';
         ctx.fillText(
@@ -608,6 +655,32 @@ export default function InvestigationCanvas({
           dn.y = dn.dragTargetY;
           dn.vx = 0;
           dn.vy = 0;
+        }
+      }
+
+      // Smooth rearrangement: lerp existing nodes toward their target layout positions
+      if (isAnimatingLayoutRef.current && targetNodesRef.current) {
+        const targetMap = new Map(targetNodesRef.current.map((tn) => [tn.id, tn]));
+        let allSettled = true;
+        nodes.forEach((n) => {
+          const target = targetMap.get(n.id);
+          if (!target) return;
+          const dx = target.x - n.x;
+          const dy = target.y - n.y;
+          if (Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5) {
+            allSettled = false;
+            n.x += dx * 0.12;
+            n.y += dy * 0.12;
+            n.vx = 0;
+            n.vy = 0;
+          } else {
+            n.x = target.x;
+            n.y = target.y;
+          }
+        });
+        if (allSettled) {
+          isAnimatingLayoutRef.current = false;
+          targetNodesRef.current = null;
         }
       }
 
@@ -677,11 +750,46 @@ export default function InvestigationCanvas({
         });
       }
 
+      // Advance progressive reconstruction: reveal one node at a time with smooth links
+      if (isReconstructingRef.current) {
+        revealRef.current = Math.min(nodes.length, revealRef.current + 0.04);
+        if (revealRef.current >= nodes.length) {
+          isReconstructingRef.current = false;
+          setIsReconstructing(false);
+        }
+      }
+
+      // Advance per-edge draw progress: each edge draws from source to target
+      // once its source endpoint has been revealed, at 0.08 progress per frame
+      const edgeProgress = edgeRevealProgressRef.current;
+      edges.forEach((edge) => {
+        const sIdx = nodes.findIndex((n) => n.id === edge.source);
+        const tIdx = nodes.findIndex((n) => n.id === edge.target);
+        const sRevealed = sIdx !== -1 && sIdx < revealRef.current;
+        const tRevealed = tIdx !== -1 && tIdx < revealRef.current;
+        const current = edgeProgress[edge.id] || 0;
+        if (sRevealed && tRevealed) {
+          if (current < 1) {
+            edgeProgress[edge.id] = Math.min(1, current + 0.08);
+          }
+        } else if (current > 0 && !sRevealed) {
+          edgeProgress[edge.id] = Math.max(0, current - 0.2);
+        }
+      });
+
+      // Nodes/edges currently visible under the progressive reveal threshold
+      const revealThreshold = revealRef.current;
+      const revealedIds = new Set<string>();
+      nodes.forEach((n, i) => {
+        if (i < revealThreshold) revealedIds.add(n.id);
+      });
+
       const activeHoverId = hoveredNodeRef.current?.id;
       const activeSelectedId = selectedNodeId;
 
       // Draw Edges
       edges.forEach((edge) => {
+        if (!revealedIds.has(edge.source) || !revealedIds.has(edge.target)) return;
         const sNode = nodes.find((n) => n.id === edge.source);
         const tNode = nodes.find((n) => n.id === edge.target);
         if (!sNode || !tNode) return;
@@ -696,10 +804,18 @@ export default function InvestigationCanvas({
           (activeHoverId && !isConnectedToHover) ||
           (activeSelectedId && !isConnectedToSelected && !isSelected);
 
+        // Progressive draw: portion of the edge visible from source toward target
+        const edgeProg = edgeRevealProgressRef.current[edge.id] ?? 1;
+        if (edgeProg <= 0) return;
+        const easedProg = edgeProg < 1 ? 1 - Math.pow(1 - edgeProg, 2) : 1;
+
+        const drawX = sNode.x + (tNode.x - sNode.x) * easedProg;
+        const drawY = sNode.y + (tNode.y - sNode.y) * easedProg;
+
         ctx.save();
         ctx.beginPath();
         ctx.moveTo(sNode.x, sNode.y);
-        ctx.lineTo(tNode.x, tNode.y);
+        ctx.lineTo(drawX, drawY);
 
         if (edge.relationshipName === 'RESOLVED_TO') {
           ctx.strokeStyle = isDimmed ? 'rgba(232, 80, 2, 0.15)' : '#E85002';
@@ -723,25 +839,28 @@ export default function InvestigationCanvas({
 
         const angle = Math.atan2(tNode.y - sNode.y, tNode.x - sNode.x);
         const arrowDist = tNode.radius + 12;
-        const arrowX = tNode.x - Math.cos(angle) * arrowDist;
-        const arrowY = tNode.y - Math.sin(angle) * arrowDist;
+        const arrowX = drawX - Math.cos(angle) * arrowDist;
+        const arrowY = drawY - Math.sin(angle) * arrowDist;
 
-        ctx.beginPath();
-        ctx.fillStyle = ctx.strokeStyle;
-        ctx.moveTo(arrowX, arrowY);
-        ctx.lineTo(
-          arrowX - 8 * Math.cos(angle - Math.PI / 6),
-          arrowY - 8 * Math.sin(angle - Math.PI / 6)
-        );
-        ctx.lineTo(
-          arrowX - 8 * Math.cos(angle + Math.PI / 6),
-          arrowY - 8 * Math.sin(angle + Math.PI / 6)
-        );
-        ctx.closePath();
-        ctx.fill();
+        // Only draw the arrow once the edge has mostly drawn
+        if (easedProg >= 0.9) {
+          ctx.beginPath();
+          ctx.fillStyle = ctx.strokeStyle;
+          ctx.moveTo(arrowX, arrowY);
+          ctx.lineTo(
+            arrowX - 8 * Math.cos(angle - Math.PI / 6),
+            arrowY - 8 * Math.sin(angle - Math.PI / 6)
+          );
+          ctx.lineTo(
+            arrowX - 8 * Math.cos(angle + Math.PI / 6),
+            arrowY - 8 * Math.sin(angle + Math.PI / 6)
+          );
+          ctx.closePath();
+          ctx.fill();
+        }
 
-        const midX = (sNode.x + tNode.x) / 2;
-        const midY = (sNode.y + tNode.y) / 2;
+        const midX = (sNode.x + drawX) / 2;
+        const midY = (sNode.y + drawY) / 2;
         const edgeLength = Math.sqrt((tNode.x - sNode.x) ** 2 + (tNode.y - sNode.y) ** 2);
 
         // Hide edge labels if edge is very short unless active, to prevent crowding
@@ -773,7 +892,8 @@ export default function InvestigationCanvas({
 
 
       // Draw Nodes
-      nodes.forEach((node) => {
+      nodes.forEach((node, nodeIndex) => {
+        if (nodeIndex >= revealThreshold) return;
         if (
           !Number.isFinite(node.x) ||
           !Number.isFinite(node.y) ||
@@ -782,6 +902,10 @@ export default function InvestigationCanvas({
         ) {
           return;
         }
+        // Smooth fade-in for the most recently revealed node during reconstruction
+        const revealFade = nodeIndex === Math.floor(revealThreshold)
+          ? revealThreshold - Math.floor(revealThreshold)
+          : 1;
         const isSelected = selectedNodeId === node.id;
         const isHovered = hoveredNodeRef.current?.id === node.id;
         const isDragged = draggedNodeRef.current?.id === node.id;
@@ -813,7 +937,9 @@ export default function InvestigationCanvas({
 
         ctx.save();
         if (isDimmed) {
-          ctx.globalAlpha = isDark ? 0.22 : 0.28;
+          ctx.globalAlpha = (isDark ? 0.22 : 0.28) * revealFade;
+        } else if (revealFade < 1) {
+          ctx.globalAlpha = revealFade;
         }
 
         const orbRadius = node.radius;
@@ -1194,6 +1320,11 @@ export default function InvestigationCanvas({
     isDraggingCanvasRef.current = false;
   };
 
+  const handleMouseLeave = () => {
+    handleMouseUp();
+    hoveredNodeRef.current = null;
+  };
+
   const handleWheel = (e: React.WheelEvent<HTMLCanvasElement>) => {
     e.preventDefault();
     const zoomFactor = e.deltaY < 0 ? 1.1 : 0.9;
@@ -1278,15 +1409,15 @@ export default function InvestigationCanvas({
             <ArrowsOut size={16} weight="bold" />
           </button>
           <button
-            onClick={() => setIsPhysicsRunning((prev) => !prev)}
+            onClick={startReconstruction}
             className={`p-2 rounded-xl transition-colors cursor-pointer ${
-              isPhysicsRunning
+              isReconstructing
                 ? 'bg-[#E85002] text-[#000000] font-bold shadow-[0_0_15px_rgba(232,80,2,0.3)] border border-[#E85002]'
                 : 'bg-[#F0F0F0] hover:bg-[#E2E6F0] text-[#0D0F14] border border-[#E2E6F0] dark:bg-[#222222] dark:text-[#A7A7A7] dark:border-[#333333]'
             }`}
-            title={isPhysicsRunning ? 'Pause Force Layout' : 'Start Force Layout'}
+            title={isReconstructing ? 'Reconstructing graph...' : 'Play: reconstruct graph node by node'}
           >
-            {isPhysicsRunning ? <Pause size={16} weight="bold" /> : <Play size={16} weight="fill" />}
+            {isReconstructing ? <Pause size={16} weight="bold" /> : <Play size={16} weight="fill" />}
           </button>
         </div>
       </div>
@@ -1297,7 +1428,7 @@ export default function InvestigationCanvas({
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
+        onMouseLeave={handleMouseLeave}
         onWheel={handleWheel}
         className="w-full h-full block cursor-grab active:cursor-grabbing outline-none"
       />

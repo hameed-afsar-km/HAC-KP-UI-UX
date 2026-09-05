@@ -10,11 +10,36 @@ import EntityDetailsDrawer from '@/components/graph/EntityDetailsDrawer';
 import RelationshipDetailsDrawer from '@/components/graph/RelationshipDetailsDrawer';
 import {
   ArrowLeft,
-  CheckSquareOffset,
-  Square,
   ArrowsClockwise,
   CaretDown
 } from '@phosphor-icons/react';
+
+// Custom pill-style entity toggle
+function EntityToggle({ checked }: { checked: boolean }) {
+  return (
+    <span
+      aria-hidden="true"
+      className={`relative inline-flex h-[18px] w-[32px] flex-shrink-0 rounded-full border transition-colors duration-200 ease-in-out ${
+        checked
+          ? 'bg-[#E85002] border-[#E85002]'
+          : 'bg-[#D1D5DB] dark:bg-[#333333] border-[#CDD2E1] dark:border-[#444444]'
+      }`}
+    >
+      <span
+        className={`pointer-events-none inline-block h-[12px] w-[12px] transform rounded-full bg-white shadow-sm ring-0 transition-all duration-200 ease-in-out ${
+          checked ? 'translate-x-[16px]' : 'translate-x-[2px]'
+        } mt-[2px]`}
+      />
+      {checked && (
+        <span className="absolute inset-0 flex items-center justify-start pl-[3px]">
+          <svg width="8" height="6" viewBox="0 0 8 6" fill="none" className="opacity-90">
+            <path d="M1 3L3 5L7 1" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </span>
+      )}
+    </span>
+  );
+}
 
 export default function InvestigationGraphPage() {
   const params = useParams();
@@ -33,6 +58,9 @@ export default function InvestigationGraphPage() {
       const data = getInvestigationGraph(caseId);
       setGraphData(data);
       setEnabledNodes(new Set(data.nodes.map(n => n.id)));
+      // Collapse all category groups by default
+      const allTypes = new Set(data.nodes.map(n => n.type));
+      setCollapsedGroups(allTypes);
     }
   }, [caseId]);
 
@@ -158,13 +186,13 @@ export default function InvestigationGraphPage() {
                 onClick={() => toggleAll(true)}
                 className="flex-1 flex items-center justify-center gap-1.5 px-2 py-2 rounded-xl bg-white hover:bg-[#F0F0F0] dark:bg-[#000000] dark:hover:bg-[#222222] border border-[#E2E6F0] dark:border-[#333333] text-[#0D0F14] dark:text-[#F9F9F9] text-[10px] font-bold font-mono uppercase transition-colors"
               >
-                <CheckSquareOffset size={14} /> All
+                <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="0.5" y="0.5" width="12" height="12" rx="2.5" stroke="currentColor"/><path d="M3 6.5l2.5 2.5L10 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg> All
               </button>
               <button
                 onClick={() => toggleAll(false)}
                 className="flex-1 flex items-center justify-center gap-1.5 px-2 py-2 rounded-xl bg-white hover:bg-[#F0F0F0] dark:bg-[#000000] dark:hover:bg-[#222222] border border-[#E2E6F0] dark:border-[#333333] text-[#0D0F14] dark:text-[#F9F9F9] text-[10px] font-bold font-mono uppercase transition-colors"
               >
-                <Square size={14} /> None
+                <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="0.5" y="0.5" width="12" height="12" rx="2.5" stroke="currentColor"/></svg> None
               </button>
               <button
                 onClick={reconstructGraph}
@@ -202,15 +230,9 @@ export default function InvestigationGraphPage() {
                           <div
                             key={node.id}
                             onClick={() => toggleNode(node.id)}
-                            className="flex items-start gap-3 p-2.5 rounded-xl hover:bg-white dark:hover:bg-[#111111] border border-transparent hover:border-[#E2E6F0] dark:hover:border-[#333333] cursor-pointer transition-colors group"
+                            className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-white dark:hover:bg-[#111111] border border-transparent hover:border-[#E2E6F0] dark:hover:border-[#333333] cursor-pointer transition-colors group"
                           >
-                            <div className="mt-0.5">
-                              {isChecked ? (
-                                <CheckSquareOffset size={16} weight="fill" className="text-[#E85002]" />
-                              ) : (
-                                <Square size={16} className="text-[#8B95AD] dark:text-[#646464] group-hover:text-[#0D0F14] dark:group-hover:text-[#A7A7A7]" />
-                              )}
-                            </div>
+                            <EntityToggle checked={isChecked} />
                             <div className="flex-1 min-w-0">
                               <p className={`text-[12px] font-bold truncate transition-colors ${isChecked ? 'text-[#0D0F14] dark:text-[#F9F9F9]' : 'text-[#8B95AD] dark:text-[#A7A7A7] group-hover:text-[#0D0F14] dark:group-hover:text-[#F9F9F9]'}`}>
                                 {node.label}

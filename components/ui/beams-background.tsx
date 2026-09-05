@@ -3,6 +3,7 @@
 import { useEffect, useRef, useCallback } from "react";
 import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
+import { useTheme } from "@/components/theme/ThemeProvider";
 
 interface AnimatedGradientBackgroundProps {
   className?: string;
@@ -48,6 +49,8 @@ export function BeamsBackground({
   const beamsRef = useRef<Beam[]>([]);
   const animationFrameRef = useRef<number>(0);
   const prefersReducedMotion = useRef(false);
+  const { theme } = useTheme();
+  const lightFactor = theme === "light" ? 0.4 : 1;
   const BEAM_COUNT = 12;
 
   const opacityMap: Record<string, number> = {
@@ -90,8 +93,10 @@ export function BeamsBackground({
       ctx.translate(beam.x, beam.y);
       ctx.rotate((beam.angle * Math.PI) / 180);
 
+      // Light mode renders the ambient beams much more subtly to reduce distraction
+      const lightModeFactor = !document.documentElement.classList.contains("dark") ? 0.45 : 1;
       const pulsingOpacity =
-        beam.opacity * (0.85 + Math.sin(beam.pulse) * 0.15) * opacityMap[intensity];
+        beam.opacity * (0.85 + Math.sin(beam.pulse) * 0.15) * opacityMap[intensity] * lightModeFactor;
 
       const gradient = ctx.createLinearGradient(0, 0, 0, beam.length);
       gradient.addColorStop(0, `hsla(${beam.hue}, 90%, 40%, 0)`);
@@ -165,7 +170,7 @@ export function BeamsBackground({
       <motion.div
         className="fixed inset-0 -z-10"
         animate={{
-          opacity: [0.02, 0.08, 0.02],
+          opacity: [0.02, 0.08, 0.02].map((v) => v * lightFactor),
         }}
         transition={{
           duration: 12,

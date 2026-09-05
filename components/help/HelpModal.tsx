@@ -46,7 +46,7 @@ export default function HelpModal() {
       {/* Floating Trigger Button */}
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 left-6 z-40 h-12 w-12 rounded-full bg-white dark:bg-[#111111] border border-[#E2E6F0] dark:border-[#333333] shadow-lg flex items-center justify-center text-[#555E6D] dark:text-[#A7A7A7] hover:text-[#0D0F14] dark:hover:text-[#F9F9F9] hover:border-[#CBD5E1] dark:hover:border-[#646464] hover:scale-105 transition-all duration-300 cursor-pointer"
+        className="fixed bottom-6 left-6 z-40 h-12 w-12 rounded-full bg-white dark:bg-[#111111] border border-[#E2E6F0] dark:border-[#333333] shadow-lg flex items-center justify-center text-[#E85002] hover:text-[#F16001] hover:border-[#E85002]/60 dark:hover:border-[#E85002]/60 hover:scale-105 transition-all duration-300 cursor-pointer"
         aria-label="Help"
       >
         <Question size={24} weight="bold" />
